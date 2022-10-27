@@ -384,7 +384,6 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/FlashIAP.o.
 Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/I2C.o.
               reference :  CThunkBase::cthunk_free(void (*)())
               reference :  CThunkBase::cthunk_alloc(CThunkBase*)
-              weak defn :  SingletonPtr<rtos::Mutex>::SingletonPtr__sub_object()
               reference :  mbed::DigitalInOut::mode(PinMode)
               reference :  mbed::DigitalInOut::input()
               reference :  mbed::DigitalInOut::output()
@@ -402,6 +401,9 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/I2C.o.
               definition:  mbed::I2C::start()
               definition:  mbed::I2C::write(int)
               definition:  mbed::I2C::write(int, char const*, int, bool)
+              definition:  mbed::I2C::_mutex
+              definition:  mbed::I2C::_owner
+              definition:  mbed::I2C::aquire()
               definition:  mbed::I2C::unlock()
               definition:  mbed::I2C::recover(PinName, PinName)
               definition:  mbed::I2C::transfer(int, char const*, int, char*, int, mbed::Callback<void (int)> const&, int, bool)
@@ -1991,7 +1993,6 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/minimal-printf/
               reference :  fputc
               definition:  mbed_minimal_formatted_string
 Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/minimal-printf/mbed_printf_wrapper.o.
-Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/newlib_nano_malloc_workaround.o.
 Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/rtos/source/ConditionVariable.o.
 Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/rtos/source/EventFlags.o.
               reference :  mbed::internal::do_timed_sleep_relative_or_forever(std::__2::chrono::duration<unsigned int, std::__2::ratio<1ll, 1000ll> >, bool (*)(void*), void*)
@@ -2402,22 +2403,22 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/storage/blockdevice/source/Read
               reference :  mbed::BlockDevice::is_valid_program(unsigned long long, unsigned long long) const
               reference :  mbed::BlockDevice::is_valid_erase(unsigned long long, unsigned long long) const
 Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/storage/blockdevice/source/SFDP.o.
-              definition:  mbed::sfdp_parse_headers(mbed::Callback<int (unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long)>, mbed::sfdp_hdr_info&)
+              definition:  mbed::sfdp_parse_headers(mbed::Callback<int (unsigned long long, void*, unsigned long long)>, mbed::sfdp_hdr_info&)
               definition:  mbed::sfdp_detect_page_size(unsigned char*, unsigned int)
               definition:  mbed::sfdp_find_addr_region(unsigned long long, mbed::sfdp_hdr_info const&)
               definition:  mbed::sfdp_parse_sfdp_header(mbed::sfdp_hdr*)
               definition:  mbed::sfdp_detect_addressability(unsigned char*, mbed::sfdp_bptbl_info&)
               definition:  mbed::sfdp_detect_device_density(unsigned char*, mbed::sfdp_bptbl_info&)
-              definition:  mbed::sfdp_parse_sector_map_table(mbed::Callback<int (unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long)>, mbed::sfdp_hdr_info&)
+              definition:  mbed::sfdp_parse_sector_map_table(mbed::Callback<int (unsigned long long, void*, unsigned long long)>, mbed::sfdp_hdr_info&)
               definition:  mbed::sfdp_parse_single_param_header(mbed::sfdp_prm_hdr*, mbed::sfdp_hdr_info&)
               definition:  mbed::sfdp_iterate_next_largest_erase_type(unsigned char, unsigned long long, unsigned long long, int, mbed::sfdp_smptbl_info const&)
               definition:  mbed::sfdp_detect_erase_types_inst_and_size(unsigned char*, mbed::sfdp_hdr_info&)
-              weak defn :  mbed::Callback<int (unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long)>::call(unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long) const
-              weak defn :  mbed::Callback<int (unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long)>::operator()(unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long) const
-              weak defn :  mbed::Callback<int (unsigned long long, mbed::sfdp_cmd_addr_size_t, unsigned char, unsigned char, void*, unsigned long long)>::operator bool() const
-              reference :  std::nothrow
+              weak defn :  mbed::Callback<int (unsigned long long, void*, unsigned long long)>::call(unsigned long long, void*, unsigned long long) const
+              weak defn :  mbed::Callback<int (unsigned long long, void*, unsigned long long)>::operator()(unsigned long long, void*, unsigned long long) const
+              weak defn :  mbed::Callback<int (unsigned long long, void*, unsigned long long)>::operator bool() const
               reference :  operator delete[](void*)
-              reference :  operator new[](unsigned int, std::nothrow_t const&)
+              reference :  operator new[](unsigned int)
+              reference :  __aeabi_memclr
               reference :  __aeabi_uldivmod
               reference :  mbed_assert_internal
               reference :  mbed::detail::CallbackBase::call_fn() const
@@ -4782,7 +4783,9 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/stm_spi_api.
               reference :  HAL_SPI_GetState
               reference :  HAL_SPI_IRQHandler
               reference :  HAL_SPI_Init
+              reference :  HAL_SPI_Receive
               reference :  HAL_SPI_Receive_IT
+              reference :  HAL_SPI_Transmit
               reference :  HAL_SPI_TransmitReceive_IT
               reference :  HAL_SPI_Transmit_IT
               reference :  PinMap_SPI_MISO
@@ -4792,8 +4795,6 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/stm_spi_api.
               reference :  __2vfprintf
               reference :  __aeabi_memset
               reference :  __stderr
-              reference :  core_util_critical_section_enter
-              reference :  core_util_critical_section_exit
               reference :  error
               definition:  init_spi
               reference :  mbed_assert_internal
@@ -4808,7 +4809,6 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/stm_spi_api.
               definition:  spi_format
               definition:  spi_free
               definition:  spi_frequency
-              definition:  spi_get_baudrate
               definition:  spi_get_capabilities
               reference :  spi_get_clock_freq
               definition:  spi_get_peripheral_name
@@ -4829,7 +4829,6 @@ Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/stm_spi_api.
               definition:  spi_slave_read
               definition:  spi_slave_receive
               definition:  spi_slave_write
-              reference :  wait_ns
 Loading object BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/trng_api.o.
               reference :  HAL_RNG_DeInit
               reference :  HAL_RNG_GenerateRandomNumber
@@ -7233,534 +7232,534 @@ Memory Map of the image
 
   Image Entry point : 0x080001ad
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x0000666c, Max: 0x00200000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00006644, Max: 0x00200000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x00006614, Max: 0x00200000, ABSOLUTE)
+    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x000065ec, Max: 0x00200000, ABSOLUTE)
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x08000000   0x000001ac   Data   RO         7877    RESET               BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/TOOLCHAIN_ARM/startup_stm32f429xx.o
-    0x080001ac   0x00000008   Code   RO         9176  * !!!main             c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__main.o)
-    0x080001b4   0x00000034   Code   RO         9783    !!!scatter          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__scatter.o)
-    0x080001e8   0x0000001a   Code   RO         9785    !!handler_copy      c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__scatter_copy.o)
+    0x08000000   0x000001ac   Data   RO         7870    RESET               BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/TOOLCHAIN_ARM/startup_stm32f429xx.o
+    0x080001ac   0x00000008   Code   RO         9131  * !!!main             c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__main.o)
+    0x080001b4   0x00000034   Code   RO         9738    !!!scatter          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__scatter.o)
+    0x080001e8   0x0000001a   Code   RO         9740    !!handler_copy      c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__scatter_copy.o)
     0x08000202   0x00000002   PAD
-    0x08000204   0x0000001c   Code   RO         9787    !!handler_zi        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__scatter_zi.o)
-    0x08000220   0x00000000   Code   RO         9100    .ARM.Collect$$_printf_percent$$00000000  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_percent.o)
-    0x08000220   0x00000006   Code   RO         9316    .ARM.Collect$$_printf_percent$$00000001  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_n.o)
-    0x08000226   0x00000006   Code   RO         9098    .ARM.Collect$$_printf_percent$$00000002  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_p.o)
-    0x0800022c   0x00000006   Code   RO         9320    .ARM.Collect$$_printf_percent$$00000003  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_f.o)
-    0x08000232   0x00000006   Code   RO         9321    .ARM.Collect$$_printf_percent$$00000004  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_e.o)
-    0x08000238   0x00000006   Code   RO         9322    .ARM.Collect$$_printf_percent$$00000005  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_g.o)
-    0x0800023e   0x00000006   Code   RO         9323    .ARM.Collect$$_printf_percent$$00000006  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_a.o)
-    0x08000244   0x0000000a   Code   RO         9328    .ARM.Collect$$_printf_percent$$00000007  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_ll.o)
-    0x0800024e   0x00000006   Code   RO         9318    .ARM.Collect$$_printf_percent$$00000008  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_i.o)
-    0x08000254   0x00000006   Code   RO         9319    .ARM.Collect$$_printf_percent$$00000009  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_d.o)
-    0x0800025a   0x00000006   Code   RO         9099    .ARM.Collect$$_printf_percent$$0000000A  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_u.o)
-    0x08000260   0x00000006   Code   RO         9317    .ARM.Collect$$_printf_percent$$0000000B  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_o.o)
-    0x08000266   0x00000006   Code   RO         9097    .ARM.Collect$$_printf_percent$$0000000C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_x.o)
-    0x0800026c   0x00000006   Code   RO         9325    .ARM.Collect$$_printf_percent$$0000000D  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_lli.o)
-    0x08000272   0x00000006   Code   RO         9326    .ARM.Collect$$_printf_percent$$0000000E  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_lld.o)
-    0x08000278   0x00000006   Code   RO         9327    .ARM.Collect$$_printf_percent$$0000000F  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_llu.o)
-    0x0800027e   0x00000006   Code   RO         9332    .ARM.Collect$$_printf_percent$$00000010  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_llo.o)
-    0x08000284   0x00000006   Code   RO         9333    .ARM.Collect$$_printf_percent$$00000011  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_llx.o)
-    0x0800028a   0x0000000a   Code   RO         9329    .ARM.Collect$$_printf_percent$$00000012  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_l.o)
-    0x08000294   0x00000006   Code   RO         9315    .ARM.Collect$$_printf_percent$$00000013  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_c.o)
-    0x0800029a   0x00000006   Code   RO         9096    .ARM.Collect$$_printf_percent$$00000014  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_s.o)
-    0x080002a0   0x00000006   Code   RO         9330    .ARM.Collect$$_printf_percent$$00000015  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_lc.o)
-    0x080002a6   0x00000006   Code   RO         9331    .ARM.Collect$$_printf_percent$$00000016  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_ls.o)
-    0x080002ac   0x00000004   Code   RO         9324    .ARM.Collect$$_printf_percent$$00000017  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_percent_end.o)
-    0x080002b0   0x00000002   Code   RO         9175    .ARM.Collect$$libinit$$00000000  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit.o)
-    0x080002b2   0x00000004   Code   RO         9375    .ARM.Collect$$libinit$$00000001  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002b6   0x00000000   Code   RO         9378    .ARM.Collect$$libinit$$00000004  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002b6   0x00000008   Code   RO         9379    .ARM.Collect$$libinit$$00000005  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002be   0x00000000   Code   RO         9381    .ARM.Collect$$libinit$$0000000A  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002be   0x00000000   Code   RO         9383    .ARM.Collect$$libinit$$0000000C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002be   0x00000000   Code   RO         9385    .ARM.Collect$$libinit$$0000000E  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002be   0x00000006   Code   RO         9386    .ARM.Collect$$libinit$$0000000F  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002c4   0x00000000   Code   RO         9388    .ARM.Collect$$libinit$$00000011  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002c4   0x0000000c   Code   RO         9389    .ARM.Collect$$libinit$$00000012  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002d0   0x00000000   Code   RO         9390    .ARM.Collect$$libinit$$00000013  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002d0   0x00000000   Code   RO         9392    .ARM.Collect$$libinit$$00000015  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002d0   0x0000000a   Code   RO         9393    .ARM.Collect$$libinit$$00000016  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9394    .ARM.Collect$$libinit$$00000017  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9396    .ARM.Collect$$libinit$$00000019  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9398    .ARM.Collect$$libinit$$0000001B  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9400    .ARM.Collect$$libinit$$0000001D  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9402    .ARM.Collect$$libinit$$0000001F  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9404    .ARM.Collect$$libinit$$00000021  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000000   Code   RO         9406    .ARM.Collect$$libinit$$00000023  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002da   0x00000004   Code   RO         9407    .ARM.Collect$$libinit$$00000024  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002de   0x00000000   Code   RO         9408    .ARM.Collect$$libinit$$00000025  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002de   0x00000000   Code   RO         9412    .ARM.Collect$$libinit$$0000002C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002de   0x00000000   Code   RO         9414    .ARM.Collect$$libinit$$0000002E  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002de   0x00000000   Code   RO         9416    .ARM.Collect$$libinit$$00000030  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002de   0x00000004   Code   RO         9417    .ARM.Collect$$libinit$$00000031  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002e2   0x00000000   Code   RO         9418    .ARM.Collect$$libinit$$00000032  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002e2   0x00000002   Code   RO         9419    .ARM.Collect$$libinit$$00000033  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
-    0x080002e4   0x00000000   Code   RO         9579    .ARM.Collect$$libshutdown$$00000004  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libshutdown2.o)
-    0x080002e4   0x00000000   Code   RO         9256    .ARM.Collect$$rtentry$$00000000  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry.o)
-    0x080002e4   0x00000000   Code   RO         9473    .ARM.Collect$$rtentry$$00000002  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
-    0x080002e4   0x00000004   Code   RO         9487    .ARM.Collect$$rtentry$$00000007  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry7.o)
-    0x080002e8   0x00000008   Code   RO         9474    .ARM.Collect$$rtentry$$00000008  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
-    0x080002f0   0x00000004   Code   RO         9476    .ARM.Collect$$rtentry$$0000000A  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
-    0x080002f4   0x00000000   Code   RO         9478    .ARM.Collect$$rtentry$$0000000C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
-    0x080002f4   0x00000008   Code   RO         9479    .ARM.Collect$$rtentry$$0000000D  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
-    0x080002fc   0x00000004   Code   RO         9488    .ARM.Collect$$rtentry$$00002718  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry7.o)
-    0x08000300   0x0000005c   Code   RO         2236    .text               BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/TOOLCHAIN_ARM/except.o
-    0x0800035c   0x00000024   Code   RO         7878    .text               BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/TOOLCHAIN_ARM/startup_stm32f429xx.o
-    0x08000380   0x00000002   Code   RO         8956    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(use_no_semi_2.o)
+    0x08000204   0x0000001c   Code   RO         9742    !!handler_zi        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__scatter_zi.o)
+    0x08000220   0x00000000   Code   RO         9055    .ARM.Collect$$_printf_percent$$00000000  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_percent.o)
+    0x08000220   0x00000006   Code   RO         9271    .ARM.Collect$$_printf_percent$$00000001  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_n.o)
+    0x08000226   0x00000006   Code   RO         9053    .ARM.Collect$$_printf_percent$$00000002  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_p.o)
+    0x0800022c   0x00000006   Code   RO         9275    .ARM.Collect$$_printf_percent$$00000003  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_f.o)
+    0x08000232   0x00000006   Code   RO         9276    .ARM.Collect$$_printf_percent$$00000004  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_e.o)
+    0x08000238   0x00000006   Code   RO         9277    .ARM.Collect$$_printf_percent$$00000005  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_g.o)
+    0x0800023e   0x00000006   Code   RO         9278    .ARM.Collect$$_printf_percent$$00000006  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_a.o)
+    0x08000244   0x0000000a   Code   RO         9283    .ARM.Collect$$_printf_percent$$00000007  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_ll.o)
+    0x0800024e   0x00000006   Code   RO         9273    .ARM.Collect$$_printf_percent$$00000008  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_i.o)
+    0x08000254   0x00000006   Code   RO         9274    .ARM.Collect$$_printf_percent$$00000009  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_d.o)
+    0x0800025a   0x00000006   Code   RO         9054    .ARM.Collect$$_printf_percent$$0000000A  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_u.o)
+    0x08000260   0x00000006   Code   RO         9272    .ARM.Collect$$_printf_percent$$0000000B  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_o.o)
+    0x08000266   0x00000006   Code   RO         9052    .ARM.Collect$$_printf_percent$$0000000C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_x.o)
+    0x0800026c   0x00000006   Code   RO         9280    .ARM.Collect$$_printf_percent$$0000000D  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_lli.o)
+    0x08000272   0x00000006   Code   RO         9281    .ARM.Collect$$_printf_percent$$0000000E  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_lld.o)
+    0x08000278   0x00000006   Code   RO         9282    .ARM.Collect$$_printf_percent$$0000000F  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_llu.o)
+    0x0800027e   0x00000006   Code   RO         9287    .ARM.Collect$$_printf_percent$$00000010  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_llo.o)
+    0x08000284   0x00000006   Code   RO         9288    .ARM.Collect$$_printf_percent$$00000011  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_llx.o)
+    0x0800028a   0x0000000a   Code   RO         9284    .ARM.Collect$$_printf_percent$$00000012  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_l.o)
+    0x08000294   0x00000006   Code   RO         9270    .ARM.Collect$$_printf_percent$$00000013  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_c.o)
+    0x0800029a   0x00000006   Code   RO         9051    .ARM.Collect$$_printf_percent$$00000014  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_s.o)
+    0x080002a0   0x00000006   Code   RO         9285    .ARM.Collect$$_printf_percent$$00000015  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_lc.o)
+    0x080002a6   0x00000006   Code   RO         9286    .ARM.Collect$$_printf_percent$$00000016  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_ls.o)
+    0x080002ac   0x00000004   Code   RO         9279    .ARM.Collect$$_printf_percent$$00000017  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_percent_end.o)
+    0x080002b0   0x00000002   Code   RO         9130    .ARM.Collect$$libinit$$00000000  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit.o)
+    0x080002b2   0x00000004   Code   RO         9330    .ARM.Collect$$libinit$$00000001  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002b6   0x00000000   Code   RO         9333    .ARM.Collect$$libinit$$00000004  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002b6   0x00000008   Code   RO         9334    .ARM.Collect$$libinit$$00000005  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002be   0x00000000   Code   RO         9336    .ARM.Collect$$libinit$$0000000A  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002be   0x00000000   Code   RO         9338    .ARM.Collect$$libinit$$0000000C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002be   0x00000000   Code   RO         9340    .ARM.Collect$$libinit$$0000000E  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002be   0x00000006   Code   RO         9341    .ARM.Collect$$libinit$$0000000F  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002c4   0x00000000   Code   RO         9343    .ARM.Collect$$libinit$$00000011  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002c4   0x0000000c   Code   RO         9344    .ARM.Collect$$libinit$$00000012  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002d0   0x00000000   Code   RO         9345    .ARM.Collect$$libinit$$00000013  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002d0   0x00000000   Code   RO         9347    .ARM.Collect$$libinit$$00000015  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002d0   0x0000000a   Code   RO         9348    .ARM.Collect$$libinit$$00000016  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9349    .ARM.Collect$$libinit$$00000017  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9351    .ARM.Collect$$libinit$$00000019  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9353    .ARM.Collect$$libinit$$0000001B  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9355    .ARM.Collect$$libinit$$0000001D  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9357    .ARM.Collect$$libinit$$0000001F  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9359    .ARM.Collect$$libinit$$00000021  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000000   Code   RO         9361    .ARM.Collect$$libinit$$00000023  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002da   0x00000004   Code   RO         9362    .ARM.Collect$$libinit$$00000024  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002de   0x00000000   Code   RO         9363    .ARM.Collect$$libinit$$00000025  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002de   0x00000000   Code   RO         9367    .ARM.Collect$$libinit$$0000002C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002de   0x00000000   Code   RO         9369    .ARM.Collect$$libinit$$0000002E  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002de   0x00000000   Code   RO         9371    .ARM.Collect$$libinit$$00000030  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002de   0x00000004   Code   RO         9372    .ARM.Collect$$libinit$$00000031  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002e2   0x00000000   Code   RO         9373    .ARM.Collect$$libinit$$00000032  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002e2   0x00000002   Code   RO         9374    .ARM.Collect$$libinit$$00000033  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libinit2.o)
+    0x080002e4   0x00000000   Code   RO         9534    .ARM.Collect$$libshutdown$$00000004  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(libshutdown2.o)
+    0x080002e4   0x00000000   Code   RO         9211    .ARM.Collect$$rtentry$$00000000  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry.o)
+    0x080002e4   0x00000000   Code   RO         9428    .ARM.Collect$$rtentry$$00000002  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
+    0x080002e4   0x00000004   Code   RO         9442    .ARM.Collect$$rtentry$$00000007  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry7.o)
+    0x080002e8   0x00000008   Code   RO         9429    .ARM.Collect$$rtentry$$00000008  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
+    0x080002f0   0x00000004   Code   RO         9431    .ARM.Collect$$rtentry$$0000000A  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
+    0x080002f4   0x00000000   Code   RO         9433    .ARM.Collect$$rtentry$$0000000C  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
+    0x080002f4   0x00000008   Code   RO         9434    .ARM.Collect$$rtentry$$0000000D  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry2.o)
+    0x080002fc   0x00000004   Code   RO         9443    .ARM.Collect$$rtentry$$00002718  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__rtentry7.o)
+    0x08000300   0x0000005c   Code   RO         2238    .text               BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/TOOLCHAIN_ARM/except.o
+    0x0800035c   0x00000024   Code   RO         7871    .text               BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/TOOLCHAIN_ARM/startup_stm32f429xx.o
+    0x08000380   0x00000002   Code   RO         8911    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(use_no_semi_2.o)
     0x08000382   0x00000002   PAD
-    0x08000384   0x00000008   Code   RO         8958    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_errno_addr.o)
-    0x0800038c   0x0000005e   Code   RO         8967    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_alloc.o)
-    0x080003ea   0x0000004e   Code   RO         8969    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_free.o)
-    0x08000438   0x000000f0   Code   RO         9025    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lludivv7m.o)
-    0x08000528   0x00000034   Code   RO         9033    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(vsnprintf.o)
-    0x0800055c   0x0000000a   Code   RO         9037    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__2vfprintf.o)
-    0x08000566   0x0000004e   Code   RO         9049    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_pad.o)
-    0x080005b4   0x00000052   Code   RO         9051    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_str.o)
+    0x08000384   0x00000008   Code   RO         8913    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_errno_addr.o)
+    0x0800038c   0x0000005e   Code   RO         8922    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_alloc.o)
+    0x080003ea   0x0000004e   Code   RO         8924    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_free.o)
+    0x08000438   0x000000f0   Code   RO         8980    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lludivv7m.o)
+    0x08000528   0x00000034   Code   RO         8988    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(vsnprintf.o)
+    0x0800055c   0x0000000a   Code   RO         8992    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__2vfprintf.o)
+    0x08000566   0x0000004e   Code   RO         9004    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_pad.o)
+    0x080005b4   0x00000052   Code   RO         9006    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_str.o)
     0x08000606   0x00000002   PAD
-    0x08000608   0x00000078   Code   RO         9053    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_dec.o)
-    0x08000680   0x00000094   Code   RO         9073    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_hex_int_ll_ptr.o)
-    0x08000714   0x00000188   Code   RO         9093    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__printf_flags_ss_wp.o)
-    0x0800089c   0x00000064   Code   RO         9109    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fflush.o)
-    0x08000900   0x000000f8   Code   RO         9123    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fseek.o)
-    0x080009f8   0x000000f0   Code   RO         9127    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fopen.o)
-    0x08000ae8   0x0000004c   Code   RO         9137    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fclose.o)
-    0x08000b34   0x0000001c   Code   RO         9151    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(strspn.o)
-    0x08000b50   0x00000058   Code   RO         9155    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(memcmp.o)
-    0x08000ba8   0x0000003e   Code   RO         9157    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(strlen.o)
-    0x08000be6   0x00000064   Code   RO         9161    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_memcpy_w.o)
-    0x08000c4a   0x0000004e   Code   RO         9167    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_memclr_w.o)
-    0x08000c98   0x0000007c   Code   RO         9171    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(strcmpv7em.o)
-    0x08000d14   0x00000006   Code   RO         9173    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(heapauxi.o)
+    0x08000608   0x00000078   Code   RO         9008    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_dec.o)
+    0x08000680   0x00000094   Code   RO         9028    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_hex_int_ll_ptr.o)
+    0x08000714   0x00000188   Code   RO         9048    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__printf_flags_ss_wp.o)
+    0x0800089c   0x00000064   Code   RO         9064    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fflush.o)
+    0x08000900   0x000000f8   Code   RO         9078    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fseek.o)
+    0x080009f8   0x000000f0   Code   RO         9082    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fopen.o)
+    0x08000ae8   0x0000004c   Code   RO         9092    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fclose.o)
+    0x08000b34   0x0000001c   Code   RO         9106    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(strspn.o)
+    0x08000b50   0x00000058   Code   RO         9110    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(memcmp.o)
+    0x08000ba8   0x0000003e   Code   RO         9112    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(strlen.o)
+    0x08000be6   0x00000064   Code   RO         9116    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_memcpy_w.o)
+    0x08000c4a   0x0000004e   Code   RO         9122    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_memclr_w.o)
+    0x08000c98   0x0000007c   Code   RO         9126    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(strcmpv7em.o)
+    0x08000d14   0x00000006   Code   RO         9128    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(heapauxi.o)
     0x08000d1a   0x00000002   PAD
-    0x08000d1c   0x00000024   Code   RO         9181    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(init_aeabi.o)
-    0x08000d40   0x00000002   Code   RO         9252    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(use_no_semi.o)
+    0x08000d1c   0x00000024   Code   RO         9136    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(init_aeabi.o)
+    0x08000d40   0x00000002   Code   RO         9207    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(use_no_semi.o)
     0x08000d42   0x00000002   PAD
-    0x08000d44   0x00000008   Code   RO         9261    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_heap_descriptor.o)
-    0x08000d4c   0x00000004   Code   RO         9266    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(hguard.o)
-    0x08000d50   0x0000008a   Code   RO         9268    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(init_alloc.o)
-    0x08000dda   0x0000000e   Code   RO         9272    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_init.o)
-    0x08000de8   0x00000024   Code   RO         9288    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_truncate.o)
-    0x08000e0c   0x000000b2   Code   RO         9290    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_intcommon.o)
-    0x08000ebe   0x00000028   Code   RO         9292    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_charcount.o)
+    0x08000d44   0x00000008   Code   RO         9216    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_heap_descriptor.o)
+    0x08000d4c   0x00000004   Code   RO         9221    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(hguard.o)
+    0x08000d50   0x0000008a   Code   RO         9223    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(init_alloc.o)
+    0x08000dda   0x0000000e   Code   RO         9227    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_init.o)
+    0x08000de8   0x00000024   Code   RO         9243    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_truncate.o)
+    0x08000e0c   0x000000b2   Code   RO         9245    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_intcommon.o)
+    0x08000ebe   0x00000028   Code   RO         9247    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_charcount.o)
     0x08000ee6   0x00000002   PAD
-    0x08000ee8   0x00000030   Code   RO         9294    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_char_common.o)
-    0x08000f18   0x0000000a   Code   RO         9296    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_sputc.o)
-    0x08000f22   0x00000010   Code   RO         9298    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_snputc.o)
-    0x08000f32   0x0000002c   Code   RO         9300    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_char.o)
+    0x08000ee8   0x00000030   Code   RO         9249    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_char_common.o)
+    0x08000f18   0x0000000a   Code   RO         9251    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_sputc.o)
+    0x08000f22   0x00000010   Code   RO         9253    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_snputc.o)
+    0x08000f32   0x0000002c   Code   RO         9255    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_char.o)
     0x08000f5e   0x00000002   PAD
-    0x08000f60   0x00000024   Code   RO         9302    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_char_file.o)
-    0x08000f84   0x000000bc   Code   RO         9304    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_wctomb.o)
-    0x08001040   0x0000007c   Code   RO         9307    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_longlong_dec.o)
-    0x080010bc   0x00000070   Code   RO         9313    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_oct_int_ll.o)
-    0x0800112c   0x00000008   Code   RO         9350    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(ferror.o)
-    0x08001134   0x000001d6   Code   RO         9354    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(flsbuf.o)
-    0x0800130a   0x00000042   Code   RO         9356    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(ftell.o)
-    0x0800134c   0x00000046   Code   RO         9358    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(setvbuf.o)
+    0x08000f60   0x00000024   Code   RO         9257    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_char_file.o)
+    0x08000f84   0x000000bc   Code   RO         9259    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_wctomb.o)
+    0x08001040   0x0000007c   Code   RO         9262    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_longlong_dec.o)
+    0x080010bc   0x00000070   Code   RO         9268    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_oct_int_ll.o)
+    0x0800112c   0x00000008   Code   RO         9305    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(ferror.o)
+    0x08001134   0x000001d6   Code   RO         9309    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(flsbuf.o)
+    0x0800130a   0x00000042   Code   RO         9311    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(ftell.o)
+    0x0800134c   0x00000046   Code   RO         9313    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(setvbuf.o)
     0x08001392   0x00000002   PAD
-    0x08001394   0x000000f0   Code   RO         9360    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio.o)
-    0x08001484   0x00000138   Code   RO         9363    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(initio.o)
-    0x080015bc   0x00000016   Code   RO         9371    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(abort.o)
-    0x080015d2   0x00000000   Code   RO         9496    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(maybetermalloc1.o)
-    0x080015d2   0x00000034   Code   RO         9498    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_extend.o)
-    0x08001606   0x0000008a   Code   RO         9502    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lludiv10.o)
-    0x08001690   0x0000041c   Code   RO         9506    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_dec.o)
-    0x08001aac   0x000002fc   Code   RO         9510    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_hex.o)
-    0x08001da8   0x0000002c   Code   RO         9517    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_wchar.o)
-    0x08001dd4   0x00000048   Code   RO         9555    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_c16rtomb.o)
-    0x08001e1c   0x0000000e   Code   RO         9557    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_abrt_outer.o)
-    0x08001e2a   0x0000000e   Code   RO         9561    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtred_outer.o)
-    0x08001e38   0x0000000e   Code   RO         9565    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtmem_outer.o)
+    0x08001394   0x000000f0   Code   RO         9315    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio.o)
+    0x08001484   0x00000138   Code   RO         9318    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(initio.o)
+    0x080015bc   0x00000016   Code   RO         9326    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(abort.o)
+    0x080015d2   0x00000000   Code   RO         9451    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(maybetermalloc1.o)
+    0x080015d2   0x00000034   Code   RO         9453    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(h1_extend.o)
+    0x08001606   0x0000008a   Code   RO         9457    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lludiv10.o)
+    0x08001690   0x0000041c   Code   RO         9461    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_dec.o)
+    0x08001aac   0x000002fc   Code   RO         9465    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_hex.o)
+    0x08001da8   0x0000002c   Code   RO         9472    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_wchar.o)
+    0x08001dd4   0x00000048   Code   RO         9510    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_c16rtomb.o)
+    0x08001e1c   0x0000000e   Code   RO         9512    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_abrt_outer.o)
+    0x08001e2a   0x0000000e   Code   RO         9516    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtred_outer.o)
+    0x08001e38   0x0000000e   Code   RO         9520    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtmem_outer.o)
     0x08001e46   0x00000002   PAD
-    0x08001e48   0x00000010   Code   RO         9602    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_ctype_table.o)
-    0x08001e58   0x00000008   Code   RO         9606    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_locale.o)
-    0x08001e60   0x00000080   Code   RO         9615    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_infnan.o)
-    0x08001ee0   0x000000e4   Code   RO         9617    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(bigflt0.o)
-    0x08001fc4   0x0000000a   Code   RO         9652    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_exit.o)
+    0x08001e48   0x00000010   Code   RO         9557    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_ctype_table.o)
+    0x08001e58   0x00000008   Code   RO         9561    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_locale.o)
+    0x08001e60   0x00000080   Code   RO         9570    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_infnan.o)
+    0x08001ee0   0x000000e4   Code   RO         9572    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(bigflt0.o)
+    0x08001fc4   0x0000000a   Code   RO         9607    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_exit.o)
     0x08001fce   0x00000002   PAD
-    0x08001fd0   0x00000030   Code   RO         9654    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_abrt_inner.o)
-    0x08002000   0x00000034   Code   RO         9660    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtred_inner.o)
-    0x08002034   0x00000050   Code   RO         9662    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtmem_inner.o)
-    0x08002084   0x00000032   Code   RO         9710    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_general.o)
+    0x08001fd0   0x00000030   Code   RO         9609    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_abrt_inner.o)
+    0x08002000   0x00000034   Code   RO         9615    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtred_inner.o)
+    0x08002034   0x00000050   Code   RO         9617    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_rtmem_inner.o)
+    0x08002084   0x00000032   Code   RO         9665    .text               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(defsig_general.o)
     0x080020b6   0x00000002   PAD
-    0x080020b8   0x00000002   Code   RO         2904    .text.$Sub$$__cpp_initialize__aeabi_  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x080020b8   0x00000002   Code   RO         2906    .text.$Sub$$__cpp_initialize__aeabi_  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
     0x080020ba   0x00000002   PAD
-    0x080020bc   0x00000032   Code   RO         2730    .text.$Sub$$__rt_lib_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080020bc   0x00000032   Code   RO         2732    .text.$Sub$$__rt_lib_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x080020ee   0x00000002   PAD
-    0x080020f0   0x0000005c   Code   RO         2910    .text.$Sub$$main    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x0800214c   0x00000012   Code   RO         8249    .text.CAN1_RX0_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x080020f0   0x0000005c   Code   RO         2912    .text.$Sub$$main    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x0800214c   0x00000012   Code   RO         8242    .text.CAN1_RX0_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
     0x0800215e   0x00000002   PAD
-    0x08002160   0x00000012   Code   RO         8255    .text.CAN1_SCE_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x08002160   0x00000012   Code   RO         8248    .text.CAN1_SCE_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
     0x08002172   0x00000002   PAD
-    0x08002174   0x00000012   Code   RO         8253    .text.CAN1_TX_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x08002174   0x00000012   Code   RO         8246    .text.CAN1_TX_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
     0x08002186   0x00000002   PAD
-    0x08002188   0x00000012   Code   RO         8257    .text.CAN2_RX0_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x08002188   0x00000012   Code   RO         8250    .text.CAN2_RX0_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
     0x0800219a   0x00000002   PAD
-    0x0800219c   0x00000012   Code   RO         8261    .text.CAN2_SCE_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x0800219c   0x00000012   Code   RO         8254    .text.CAN2_SCE_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
     0x080021ae   0x00000002   PAD
-    0x080021b0   0x00000012   Code   RO         8259    .text.CAN2_TX_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x080021b0   0x00000012   Code   RO         8252    .text.CAN2_TX_IRQHandler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
     0x080021c2   0x00000002   PAD
-    0x080021c4   0x0000009c   Code   RO         8367    .text.HAL_GetTick   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
-    0x08002260   0x00000036   Code   RO         3740    .text.HAL_Init      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal.o
+    0x080021c4   0x0000009c   Code   RO         8360    .text.HAL_GetTick   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
+    0x08002260   0x00000036   Code   RO         3733    .text.HAL_Init      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal.o
     0x08002296   0x00000002   PAD
-    0x08002298   0x0000000a   Code   RO         8365    .text.HAL_InitTick  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
+    0x08002298   0x0000000a   Code   RO         8358    .text.HAL_InitTick  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
     0x080022a2   0x00000002   PAD
-    0x080022a4   0x00000002   Code   RO         3744    .text.HAL_MspInit   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal.o
+    0x080022a4   0x00000002   Code   RO         3737    .text.HAL_MspInit   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal.o
     0x080022a6   0x00000002   PAD
-    0x080022a8   0x00000008   Code   RO         3909    .text.HAL_NVIC_SetPriorityGrouping  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_cortex.o
-    0x080022b0   0x0000007a   Code   RO         5429    .text.HAL_PWREx_EnableOverDrive  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_pwr_ex.o
+    0x080022a8   0x00000008   Code   RO         3902    .text.HAL_NVIC_SetPriorityGrouping  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_cortex.o
+    0x080022b0   0x0000007a   Code   RO         5422    .text.HAL_PWREx_EnableOverDrive  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_pwr_ex.o
     0x0800232a   0x00000002   PAD
-    0x0800232c   0x00000160   Code   RO         5448    .text.HAL_RCC_ClockConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
-    0x0800248c   0x0000003e   Code   RO         5466    .text.HAL_RCC_GetClockConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x0800232c   0x00000160   Code   RO         5441    .text.HAL_RCC_ClockConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x0800248c   0x0000003e   Code   RO         5459    .text.HAL_RCC_GetClockConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
     0x080024ca   0x00000002   PAD
-    0x080024cc   0x0000000c   Code   RO         5458    .text.HAL_RCC_GetHCLKFreq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
-    0x080024d8   0x00000098   Code   RO         5464    .text.HAL_RCC_GetOscConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
-    0x08002570   0x00000022   Code   RO         5460    .text.HAL_RCC_GetPCLK1Freq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x080024cc   0x0000000c   Code   RO         5451    .text.HAL_RCC_GetHCLKFreq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x080024d8   0x00000098   Code   RO         5457    .text.HAL_RCC_GetOscConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x08002570   0x00000022   Code   RO         5453    .text.HAL_RCC_GetPCLK1Freq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
     0x08002592   0x00000002   PAD
-    0x08002594   0x00000022   Code   RO         5462    .text.HAL_RCC_GetPCLK2Freq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x08002594   0x00000022   Code   RO         5455    .text.HAL_RCC_GetPCLK2Freq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
     0x080025b6   0x00000002   PAD
-    0x080025b8   0x0000006a   Code   RO         5450    .text.HAL_RCC_GetSysClockFreq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x080025b8   0x0000006a   Code   RO         5443    .text.HAL_RCC_GetSysClockFreq  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
     0x08002622   0x00000002   PAD
-    0x08002624   0x00000348   Code   RO         5446    .text.HAL_RCC_OscConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
-    0x0800296c   0x0000005a   Code   RO         6313    .text.HAL_TIM_OC_Init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
+    0x08002624   0x00000348   Code   RO         5439    .text.HAL_RCC_OscConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_rcc.o
+    0x0800296c   0x0000005a   Code   RO         6306    .text.HAL_TIM_OC_Init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
     0x080029c6   0x00000002   PAD
-    0x080029c8   0x00000002   Code   RO         6315    .text.HAL_TIM_OC_MspInit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
+    0x080029c8   0x00000002   Code   RO         6308    .text.HAL_TIM_OC_MspInit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
     0x080029ca   0x00000002   PAD
-    0x080029cc   0x00000122   Code   RO         6321    .text.HAL_TIM_OC_Start  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
+    0x080029cc   0x00000122   Code   RO         6314    .text.HAL_TIM_OC_Start  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
     0x08002aee   0x00000002   PAD
-    0x08002af0   0x0000005e   Code   RO         6623    .text.HAL_UART_Init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o
+    0x08002af0   0x0000005e   Code   RO         6616    .text.HAL_UART_Init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o
     0x08002b4e   0x00000002   PAD
-    0x08002b50   0x00000002   Code   RO         6625    .text.HAL_UART_MspInit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o
+    0x08002b50   0x00000002   Code   RO         6618    .text.HAL_UART_MspInit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o
     0x08002b52   0x00000002   PAD
-    0x08002b54   0x00000016   Code   RO         8538    .text.LL_GPIO_GetPinMode  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002b54   0x00000016   Code   RO         8531    .text.LL_GPIO_GetPinMode  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
     0x08002b6a   0x00000002   PAD
-    0x08002b6c   0x00000020   Code   RO         8542    .text.LL_GPIO_SetAFPin_0_7  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08002b8c   0x00000022   Code   RO         8540    .text.LL_GPIO_SetAFPin_8_15  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002b6c   0x00000020   Code   RO         8535    .text.LL_GPIO_SetAFPin_0_7  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002b8c   0x00000022   Code   RO         8533    .text.LL_GPIO_SetAFPin_8_15  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
     0x08002bae   0x00000002   PAD
-    0x08002bb0   0x00000020   Code   RO         8294    .text.LL_GPIO_SetPinMode  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
-    0x08002bd0   0x00000020   Code   RO         8530    .text.LL_GPIO_SetPinMode  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08002bf0   0x0000000c   Code   RO         8532    .text.LL_GPIO_SetPinOutputType  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08002bfc   0x00000020   Code   RO         8544    .text.LL_GPIO_SetPinPull  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08002c1c   0x00000020   Code   RO         8526    .text.LL_GPIO_SetPinSpeed  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08002c3c   0x0000000a   Code   RO         8909    .text.LL_TIM_GenerateEvent_CC1  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08002bb0   0x00000020   Code   RO         8287    .text.LL_GPIO_SetPinMode  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
+    0x08002bd0   0x00000020   Code   RO         8523    .text.LL_GPIO_SetPinMode  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002bf0   0x0000000c   Code   RO         8525    .text.LL_GPIO_SetPinOutputType  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002bfc   0x00000020   Code   RO         8537    .text.LL_GPIO_SetPinPull  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002c1c   0x00000020   Code   RO         8519    .text.LL_GPIO_SetPinSpeed  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08002c3c   0x0000000a   Code   RO         8864    .text.LL_TIM_GenerateEvent_CC1  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
     0x08002c46   0x00000002   PAD
-    0x08002c48   0x00000030   Code   RO         7881    .text.SetSysClock   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/system_clock.o
-    0x08002c78   0x000000be   Code   RO         7883    .text.SetSysClock_PLL_HSE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/system_clock.o
+    0x08002c48   0x00000030   Code   RO         7874    .text.SetSysClock   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/system_clock.o
+    0x08002c78   0x000000be   Code   RO         7876    .text.SetSysClock_PLL_HSE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/system_clock.o
     0x08002d36   0x00000002   PAD
-    0x08002d38   0x0000009c   Code   RO         7885    .text.SetSysClock_PLL_HSI  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/system_clock.o
-    0x08002dd4   0x00000224   Code   RO         8284    .text.Set_GPIO_Clock  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
-    0x08002ff8   0x0000007e   Code   RO         7842    .text.SystemCoreClockUpdate  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
+    0x08002d38   0x0000009c   Code   RO         7878    .text.SetSysClock_PLL_HSI  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/system_clock.o
+    0x08002dd4   0x00000224   Code   RO         8277    .text.Set_GPIO_Clock  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
+    0x08002ff8   0x0000007e   Code   RO         7835    .text.SystemCoreClockUpdate  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
     0x08003076   0x00000002   PAD
-    0x08003078   0x0000001e   Code   RO         7840    .text.SystemInit    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
+    0x08003078   0x0000001e   Code   RO         7833    .text.SystemInit    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
     0x08003096   0x00000002   PAD
-    0x08003098   0x00000124   Code   RO         6289    .text.TIM_Base_SetConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
-    0x080031bc   0x00000024   Code   RO         6323    .text.TIM_CCxChannelCmd  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
-    0x080031e0   0x00000002   Code   RO         8511    .text.TargetBSP_Init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/mbed_overrides.o
+    0x08003098   0x00000124   Code   RO         6282    .text.TIM_Base_SetConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
+    0x080031bc   0x00000024   Code   RO         6316    .text.TIM_CCxChannelCmd  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_tim.o
+    0x080031e0   0x00000002   Code   RO         8504    .text.TargetBSP_Init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/mbed_overrides.o
     0x080031e2   0x00000002   PAD
-    0x080031e4   0x000000dc   Code   RO         6627    .text.UART_SetConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o
+    0x080031e4   0x000000dc   Code   RO         6620    .text.UART_SetConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_uart.o
     0x080032c0   0x00000010   Code   RO           15    .text._GLOBAL__sub_I_main.cpp  BUILD/NUCLEO_F429ZI/ARMC6/main.o
     0x080032d0   0x00000004   Code   RO           76    .text._Z21core_util_atomic_loadIN4rtos5MutexEEPT_PKS3_  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
     0x080032d4   0x00000004   Code   RO           80    .text._Z22core_util_atomic_storeIN4rtos5MutexEEvPPT_S3_  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
     0x080032d8   0x00000014   Code   RO           13    .text._ZL10gpio_writeP6gpio_ti  BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x080032ec   0x00000026   Code   RO         2672    .text._ZL11get_consolei  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080032ec   0x00000026   Code   RO         2674    .text._ZL11get_consolei  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x08003312   0x00000002   PAD
-    0x08003314   0x0000000e   Code   RO         2702    .text._ZL12convert_crlfi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003314   0x0000000e   Code   RO         2704    .text._ZL12convert_crlfi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x08003322   0x00000002   PAD
-    0x08003324   0x0000004e   Code   RO         2822    .text._ZL15default_consolev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003324   0x0000004e   Code   RO         2824    .text._ZL15default_consolev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x08003372   0x00000002   PAD
-    0x08003374   0x0000001c   Code   RO         2694    .text._ZL18handle_open_errorsij  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003390   0x0000002a   Code   RO         2692    .text._ZL18openflags_to_posixi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003374   0x0000001c   Code   RO         2696    .text._ZL18handle_open_errorsij  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003390   0x0000002a   Code   RO         2694    .text._ZL18openflags_to_posixi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x080033ba   0x00000002   PAD
-    0x080033bc   0x0000005a   Code   RO         2676    .text._ZL18reserve_filehandlev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080033bc   0x0000005a   Code   RO         2678    .text._ZL18reserve_filehandlev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x08003416   0x00000002   PAD
-    0x08003418   0x0000001e   Code   RO         2658    .text._ZN12DirectSerial4readEPvj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003418   0x0000001e   Code   RO         2660    .text._ZN12DirectSerial4readEPvj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x08003436   0x00000002   PAD
-    0x08003438   0x0000000a   Code   RO         2852    .text._ZN12DirectSerial4seekEli  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003438   0x0000000a   Code   RO         2854    .text._ZN12DirectSerial4seekEli  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x08003442   0x00000002   PAD
-    0x08003444   0x00000006   Code   RO         2858    .text._ZN12DirectSerial4sizeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003444   0x00000006   Code   RO         2860    .text._ZN12DirectSerial4sizeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x0800344a   0x00000002   PAD
-    0x0800344c   0x00000004   Code   RO         2854    .text._ZN12DirectSerial5closeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003450   0x00000028   Code   RO         2656    .text._ZN12DirectSerial5writeEPKvj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003478   0x00000004   Code   RO         2856    .text._ZN12DirectSerial6isattyEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x0800347c   0x00000044   Code   RO         2654    .text._ZN12DirectSerialC2ERK15serial_pinmap_ti  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x080034c0   0x0000000c   Code   RO         2850    .text._ZN12DirectSerialD0Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x0800344c   0x00000004   Code   RO         2856    .text._ZN12DirectSerial5closeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003450   0x00000028   Code   RO         2658    .text._ZN12DirectSerial5writeEPKvj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003478   0x00000004   Code   RO         2858    .text._ZN12DirectSerial6isattyEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x0800347c   0x00000044   Code   RO         2656    .text._ZN12DirectSerialC2ERK15serial_pinmap_ti  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080034c0   0x0000000c   Code   RO         2852    .text._ZN12DirectSerialD0Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x080034cc   0x00000008   Code   RO           36    .text._ZN4mbed10DigitalOut5writeEi  BUILD/NUCLEO_F429ZI/ARMC6/main.o
     0x080034d4   0x0000001e   Code   RO           30    .text._ZN4mbed10DigitalOutC2E7PinName  BUILD/NUCLEO_F429ZI/ARMC6/main.o
     0x080034f2   0x00000002   PAD
     0x080034f4   0x0000000c   Code   RO           32    .text._ZN4mbed10DigitalOutaSEi  BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x08003500   0x00000006   Code   RO         1957    .text._ZN4mbed10FileHandle12enable_inputEb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x08003500   0x00000006   Code   RO         1959    .text._ZN4mbed10FileHandle12enable_inputEb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
     0x08003506   0x00000002   PAD
-    0x08003508   0x00000010   Code   RO         1302    .text._ZN4mbed10FileHandle12set_blockingEb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
-    0x08003518   0x00000006   Code   RO         1959    .text._ZN4mbed10FileHandle13enable_outputEb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x08003508   0x00000010   Code   RO         1304    .text._ZN4mbed10FileHandle12set_blockingEb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
+    0x08003518   0x00000006   Code   RO         1961    .text._ZN4mbed10FileHandle13enable_outputEb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
     0x0800351e   0x00000002   PAD
-    0x08003520   0x00000036   Code   RO         1943    .text._ZN4mbed10FileHandle4sizeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x08003520   0x00000036   Code   RO         1945    .text._ZN4mbed10FileHandle4sizeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
     0x08003556   0x00000002   PAD
-    0x08003558   0x00000004   Code   RO         1296    .text._ZN4mbed10FileHandle4syncEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
+    0x08003558   0x00000004   Code   RO         1298    .text._ZN4mbed10FileHandle4syncEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
     0x0800355c   0x0000000e   Code   RO          224    .text._ZN4mbed10FileHandle4tellEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/BufferedSerial.o
     0x0800356a   0x00000002   PAD
-    0x0800356c   0x00000002   Code   RO         1306    .text._ZN4mbed10FileHandle5sigioENS_8CallbackIFvvEEE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
+    0x0800356c   0x00000002   Code   RO         1308    .text._ZN4mbed10FileHandle5sigioENS_8CallbackIFvvEEE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
     0x0800356e   0x00000002   PAD
-    0x08003570   0x00000004   Code   RO         1955    .text._ZN4mbed10FileHandle6isattyEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x08003570   0x00000004   Code   RO         1957    .text._ZN4mbed10FileHandle6isattyEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
     0x08003574   0x0000000e   Code   RO          226    .text._ZN4mbed10FileHandle6rewindEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/BufferedSerial.o
     0x08003582   0x00000002   PAD
     0x08003584   0x00000006   Code   RO          228    .text._ZN4mbed10FileHandle8truncateEl  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/BufferedSerial.o
     0x0800358a   0x00000002   PAD
     0x0800358c   0x0000000e   Code   RO          192    .text._ZN4mbed10FileHandleC2Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/BufferedSerial.o
     0x0800359a   0x00000002   PAD
-    0x0800359c   0x00000002   Code   RO         1953    .text._ZN4mbed10FileHandleD0Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x0800359c   0x00000002   Code   RO         1955    .text._ZN4mbed10FileHandleD0Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
     0x0800359e   0x00000002   PAD
     0x080035a0   0x00000002   Code   RO          202    .text._ZN4mbed10FileHandleD2Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/BufferedSerial.o
     0x080035a2   0x00000002   PAD
-    0x080035a4   0x0000002e   Code   RO         2670    .text._ZN4mbed16mbed_file_handleEi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080035a4   0x0000002e   Code   RO         2672    .text._ZN4mbed16mbed_file_handleEi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x080035d2   0x00000002   PAD
-    0x080035d4   0x00000004   Code   RO         2668    .text._ZN4mbed21mbed_override_consoleEi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x080035d8   0x00000004   Code   RO         2666    .text._ZN4mbed28mbed_target_override_consoleEi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x080035dc   0x00000002   Code   RO          702    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE10shift_leftEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080035d4   0x00000004   Code   RO         2670    .text._ZN4mbed21mbed_override_consoleEi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080035d8   0x00000004   Code   RO         2668    .text._ZN4mbed28mbed_target_override_consoleEi  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080035dc   0x00000002   Code   RO          704    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE10shift_leftEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x080035de   0x00000002   PAD
-    0x080035e0   0x00000008   Code   RO          700    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE11reflect_crcEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x080035e8   0x00000002   Code   RO          722    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE11shift_rightEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080035e0   0x00000008   Code   RO          702    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE11reflect_crcEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080035e8   0x00000002   Code   RO          724    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE11shift_rightEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x080035ea   0x00000002   PAD
-    0x080035ec   0x00000006   Code   RO          728    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE12get_crc_maskEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080035ec   0x00000006   Code   RO          730    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE12get_crc_maskEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x080035f2   0x00000002   PAD
-    0x080035f4   0x00000008   Code   RO          710    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE15compute_partialEPKvjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x080035fc   0x00000012   Code   RO          718    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE15do_1_bit_normalEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080035f4   0x00000008   Code   RO          712    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE15compute_partialEPKvjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080035fc   0x00000012   Code   RO          720    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE15do_1_bit_normalEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x0800360e   0x00000002   PAD
-    0x08003610   0x00000006   Code   RO          724    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE16reflect_constantEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x08003610   0x00000006   Code   RO          726    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE16reflect_constantEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x08003616   0x00000002   PAD
-    0x08003618   0x00000012   Code   RO          716    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE18do_1_bit_reflectedEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x08003618   0x00000012   Code   RO          718    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE18do_1_bit_reflectedEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x0800362a   0x00000002   PAD
-    0x0800362c   0x00000010   Code   RO          726    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE18get_top_polynomialEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x0800363c   0x00000010   Code   RO          698    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE20adjust_initial_valueEjb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x0800364c   0x00000036   Code   RO          712    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE20compute_partial_stopEPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x0800362c   0x00000010   Code   RO          728    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE18get_top_polynomialEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x0800363c   0x00000010   Code   RO          700    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE20adjust_initial_valueEjb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x0800364c   0x00000036   Code   RO          714    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE20compute_partial_stopEPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x08003682   0x00000002   PAD
-    0x08003684   0x00000008   Code   RO          708    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE21compute_partial_startEPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x0800368c   0x00000014   Code   RO          720    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE24get_reflected_polynomialEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x080036a0   0x00000034   Code   RO          706    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE7computeEPKvjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x080036d4   0x00000006   Code   RO          704    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE7reflectEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x08003684   0x00000008   Code   RO          710    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE21compute_partial_startEPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x0800368c   0x00000014   Code   RO          722    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE24get_reflected_polynomialEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080036a0   0x00000034   Code   RO          708    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE7computeEPKvjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080036d4   0x00000006   Code   RO          706    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE7reflectEj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x080036da   0x00000002   PAD
-    0x080036dc   0x00000022   Code   RO          696    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EEC2Ejjbb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080036dc   0x00000022   Code   RO          698    .text._ZN4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EEC2Ejjbb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
     0x080036fe   0x00000002   PAD
-    0x08003700   0x00000008   Code   RO          694    .text._ZN4mbed7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE7computeEPKvjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x08003708   0x00000014   Code   RO          692    .text._ZN4mbed7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EEC2Ejjbb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x0800371c   0x00000004   Code   RO         1919    .text._ZN4mbed8FileBase11getPathTypeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
-    0x08003720   0x000000a4   Code   RO         1925    .text._ZN4mbed8FileBase6lookupEPKcj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
-    0x080037c4   0x0000001a   Code   RO         1970    .text._ZN4mbed8FilePath10fileSystemEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x08003700   0x00000008   Code   RO          696    .text._ZN4mbed7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE7computeEPKvjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x08003708   0x00000014   Code   RO          694    .text._ZN4mbed7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EEC2Ejjbb  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x0800371c   0x00000004   Code   RO         1921    .text._ZN4mbed8FileBase11getPathTypeEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
+    0x08003720   0x000000a4   Code   RO         1927    .text._ZN4mbed8FileBase6lookupEPKcj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
+    0x080037c4   0x0000001a   Code   RO         1972    .text._ZN4mbed8FilePath10fileSystemEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
     0x080037de   0x00000002   PAD
-    0x080037e0   0x00000018   Code   RO         1968    .text._ZN4mbed8FilePath12isFileSystemEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
-    0x080037f8   0x0000001a   Code   RO         1974    .text._ZN4mbed8FilePath4fileEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x080037e0   0x00000018   Code   RO         1970    .text._ZN4mbed8FilePath12isFileSystemEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x080037f8   0x0000001a   Code   RO         1976    .text._ZN4mbed8FilePath4fileEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
     0x08003812   0x00000002   PAD
-    0x08003814   0x0000000a   Code   RO         1976    .text._ZN4mbed8FilePath6existsEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x08003814   0x0000000a   Code   RO         1978    .text._ZN4mbed8FilePath6existsEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
     0x0800381e   0x00000002   PAD
-    0x08003820   0x00000016   Code   RO         1972    .text._ZN4mbed8FilePath6isFileEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x08003820   0x00000016   Code   RO         1974    .text._ZN4mbed8FilePath6isFileEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
     0x08003836   0x00000002   PAD
-    0x08003838   0x00000004   Code   RO         1966    .text._ZN4mbed8FilePath8fileNameEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
-    0x0800383c   0x0000008c   Code   RO         1964    .text._ZN4mbed8FilePathC2EPKc  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
-    0x080038c8   0x00000002   Code   RO           72    .text._ZN4rtos5Mutex4lockEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
+    0x08003838   0x00000004   Code   RO         1968    .text._ZN4mbed8FilePath8fileNameEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x0800383c   0x00000088   Code   RO         1966    .text._ZN4mbed8FilePathC2EPKc  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FilePath.o
+    0x080038c4   0x00000002   Code   RO           72    .text._ZN4rtos5Mutex4lockEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
+    0x080038c6   0x00000002   PAD
+    0x080038c8   0x00000002   Code   RO           82    .text._ZN4rtos5Mutex6unlockEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
     0x080038ca   0x00000002   PAD
-    0x080038cc   0x00000002   Code   RO           82    .text._ZN4rtos5Mutex6unlockEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
+    0x080038cc   0x00000002   Code   RO           78    .text._ZN4rtos5MutexC2Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
     0x080038ce   0x00000002   PAD
-    0x080038d0   0x00000002   Code   RO           78    .text._ZN4rtos5MutexC2Ev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
-    0x080038d2   0x00000002   PAD
-    0x080038d4   0x0000003e   Code   RO         2660    .text._ZNK12DirectSerial4pollEs  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003912   0x00000002   PAD
-    0x08003914   0x00000044   Code   RO          968    .text._ZNK12SingletonPtrIN4rtos5MutexEE3getEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/SPI.o
-    0x08003958   0x00000008   Code   RO           70    .text._ZNK12SingletonPtrIN4rtos5MutexEEptEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
-    0x08003960   0x00000004   Code   RO         1304    .text._ZNK4mbed10FileHandle11is_blockingEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
-    0x08003964   0x00000004   Code   RO         1961    .text._ZNK4mbed10FileHandle4pollEs  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
-    0x08003968   0x0000005c   Code   RO          714    .text._ZNK4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE18do_compute_partialILS2_2EEENSt3__29enable_ifIXeqT_LS2_2EEiE4typeEPKhjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x080039c4   0x00000008   Code   RO         2754    .text._ZdlPv        BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x080039cc   0x00000010   Code   RO         8899    .text.__NVIC_EnableIRQ  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x080039dc   0x00000020   Code   RO         3911    .text.__NVIC_SetPriorityGrouping  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_cortex.o
-    0x080039fc   0x00000018   Code   RO         8897    .text.__NVIC_SetVector  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x08003a14   0x00000024   Code   RO         2473    .text.__NVIC_SystemReset  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x08003a38   0x0000005c   Code   RO         2796    .text.__cxa_guard_acquire  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003a94   0x00000032   Code   RO         2798    .text.__cxa_guard_release  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003ac6   0x00000002   PAD
-    0x08003ac8   0x00000028   Code   RO         9244    .text.__cxa_pure_virtual  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\libcxx\libcppabi_w.l(cxa_virtual.cpp.o)
-    0x08003af0   0x00000012   Code   RO            5    .text.__cxx_global_var_init  BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x08003b02   0x00000002   PAD
-    0x08003b04   0x00000012   Code   RO            7    .text.__cxx_global_var_init.1  BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x08003b16   0x00000002   PAD
-    0x08003b18   0x00000012   Code   RO            9    .text.__cxx_global_var_init.2  BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x08003b2a   0x00000002   PAD
-    0x08003b2c   0x00000008   Code   RO         2732    .text.__user_setup_stackheap  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003b34   0x00000030   Code   RO         1474    .text._gpio_init_out  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
-    0x08003b64   0x00000032   Code   RO         2728    .text._mbed_user_setup_stackheap  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003b96   0x00000002   PAD
-    0x08003b98   0x00000008   Code   RO         2908    .text._platform_post_stackheap_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x08003ba0   0x00000008   Code   RO         2696    .text._sys_close    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003ba8   0x00000002   Code   RO         2706    .text._sys_exit     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003baa   0x00000002   PAD
-    0x08003bac   0x0000002a   Code   RO         2726    .text._sys_flen     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003bd6   0x00000002   PAD
-    0x08003bd8   0x00000008   Code   RO         2714    .text._sys_istty    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003be0   0x0000006a   Code   RO         2688    .text._sys_open     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003c4a   0x00000002   PAD
-    0x08003c4c   0x0000000a   Code   RO         2716    .text._sys_seek     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003c56   0x00000002   PAD
-    0x08003c58   0x00000114   Code   RO         2700    .text._sys_write    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003d6c   0x00000030   Code   RO         1610    .text._ticker_match_interval_passed  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
-    0x08003d9c   0x00000018   Code   RO         2708    .text._ttywrch      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003db4   0x00000008   Code   RO         2959    .text._wait_us_inline  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_wait_api_no_rtos.o
-    0x08003dbc   0x00000016   Code   RO         2961    .text._wait_us_ticks  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_wait_api_no_rtos.o
-    0x08003dd2   0x00000004   Code   RO         9469    .text.abort_message  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\libcxx\libcppabi_w.l(abort_message.cpp.o)
+    0x080038d0   0x0000003e   Code   RO         2662    .text._ZNK12DirectSerial4pollEs  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x0800390e   0x00000002   PAD
+    0x08003910   0x00000040   Code   RO          970    .text._ZNK12SingletonPtrIN4rtos5MutexEE3getEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/SPI.o
+    0x08003950   0x00000008   Code   RO           70    .text._ZNK12SingletonPtrIN4rtos5MutexEEptEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/AnalogIn.o
+    0x08003958   0x00000004   Code   RO         1306    .text._ZNK4mbed10FileHandle11is_blockingEv  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/UnbufferedSerial.o
+    0x0800395c   0x00000004   Code   RO         1963    .text._ZNK4mbed10FileHandle4pollEs  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x08003960   0x0000005c   Code   RO          716    .text._ZNK4mbed4impl7MbedCRCILj79764919ELh32ELNS_7CrcModeE2EE18do_compute_partialILS2_2EEENSt3__29enable_ifIXeqT_LS2_2EEiE4typeEPKhjPj  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x080039bc   0x00000008   Code   RO         2756    .text._ZdlPv        BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080039c4   0x00000010   Code   RO         8854    .text.__NVIC_EnableIRQ  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x080039d4   0x00000020   Code   RO         3904    .text.__NVIC_SetPriorityGrouping  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal_cortex.o
+    0x080039f4   0x00000018   Code   RO         8852    .text.__NVIC_SetVector  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08003a0c   0x00000024   Code   RO         2475    .text.__NVIC_SystemReset  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x08003a30   0x00000058   Code   RO         2798    .text.__cxa_guard_acquire  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003a88   0x0000002e   Code   RO         2800    .text.__cxa_guard_release  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003ab6   0x00000002   PAD
+    0x08003ab8   0x00000028   Code   RO         9199    .text.__cxa_pure_virtual  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\libcxx\libcppabi_w.l(cxa_virtual.cpp.o)
+    0x08003ae0   0x00000012   Code   RO            5    .text.__cxx_global_var_init  BUILD/NUCLEO_F429ZI/ARMC6/main.o
+    0x08003af2   0x00000002   PAD
+    0x08003af4   0x00000012   Code   RO            7    .text.__cxx_global_var_init.1  BUILD/NUCLEO_F429ZI/ARMC6/main.o
+    0x08003b06   0x00000002   PAD
+    0x08003b08   0x00000012   Code   RO            9    .text.__cxx_global_var_init.2  BUILD/NUCLEO_F429ZI/ARMC6/main.o
+    0x08003b1a   0x00000002   PAD
+    0x08003b1c   0x00000008   Code   RO         2734    .text.__user_setup_stackheap  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003b24   0x00000030   Code   RO         1476    .text._gpio_init_out  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
+    0x08003b54   0x00000032   Code   RO         2730    .text._mbed_user_setup_stackheap  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003b86   0x00000002   PAD
+    0x08003b88   0x00000008   Code   RO         2910    .text._platform_post_stackheap_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x08003b90   0x00000008   Code   RO         2698    .text._sys_close    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003b98   0x00000002   Code   RO         2708    .text._sys_exit     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003b9a   0x00000002   PAD
+    0x08003b9c   0x0000002a   Code   RO         2728    .text._sys_flen     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003bc6   0x00000002   PAD
+    0x08003bc8   0x00000008   Code   RO         2716    .text._sys_istty    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003bd0   0x0000006a   Code   RO         2690    .text._sys_open     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003c3a   0x00000002   PAD
+    0x08003c3c   0x0000000a   Code   RO         2718    .text._sys_seek     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003c46   0x00000002   PAD
+    0x08003c48   0x00000114   Code   RO         2702    .text._sys_write    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003d5c   0x00000030   Code   RO         1612    .text._ticker_match_interval_passed  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
+    0x08003d8c   0x00000018   Code   RO         2710    .text._ttywrch      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003da4   0x00000008   Code   RO         2961    .text._wait_us_inline  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_wait_api_no_rtos.o
+    0x08003dac   0x00000016   Code   RO         2963    .text._wait_us_ticks  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_wait_api_no_rtos.o
+    0x08003dc2   0x00000004   Code   RO         9424    .text.abort_message  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\libcxx\libcppabi_w.l(abort_message.cpp.o)
+    0x08003dc6   0x00000002   PAD
+    0x08003dc8   0x0000000c   Code   RO         1439    .text.are_interrupts_enabled  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
+    0x08003dd4   0x00000002   Code   RO         1668    .text.block_us_ticker_free  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
     0x08003dd6   0x00000002   PAD
-    0x08003dd8   0x0000000c   Code   RO         1437    .text.are_interrupts_enabled  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
-    0x08003de4   0x00000002   Code   RO         1666    .text.block_us_ticker_free  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
-    0x08003de6   0x00000002   PAD
-    0x08003de8   0x0000013c   Code   RO         8251    .text.can_irq       BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
-    0x08003f24   0x0000003c   Code   RO         2698    .text.close         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08003f60   0x0000006c   Code   RO         1650    .text.compute_tick_round_up  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
-    0x08003fcc   0x0000000c   Code   RO         2408    .text.core_util_are_interrupts_enabled  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
-    0x08003fd8   0x00000010   Code   RO         2289    .text.core_util_atomic_exchange_u8  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_atomic_impl.o
-    0x08003fe8   0x00000016   Code   RO         2287    .text.core_util_atomic_flag_test_and_set  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_atomic_impl.o
-    0x08003ffe   0x00000002   PAD
-    0x08004000   0x00000088   Code   RO         2414    .text.core_util_critical_section_enter  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
-    0x08004088   0x0000001e   Code   RO         2416    .text.core_util_critical_section_exit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
-    0x080040a6   0x00000002   PAD
-    0x080040a8   0x0000000c   Code   RO         2410    .text.core_util_is_isr_active  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
-    0x080040b4   0x00000054   Code   RO         8687    .text.debug         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x08004108   0x00000064   Code   RO         2427    .text.error         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x0800416c   0x0000002e   Code   RO         2772    .text.exit          BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x0800419a   0x00000002   PAD
-    0x0800419c   0x0000002c   Code   RO         2724    .text.fsync         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x080041c8   0x000000c0   Code   RO         8677    .text.get_uart_index  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x08004288   0x00000016   Code   RO         8292    .text.gpio_dir      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
-    0x0800429e   0x00000002   PAD
-    0x080042a0   0x00000046   Code   RO         8288    .text.gpio_init     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
-    0x080042e6   0x00000002   PAD
-    0x080042e8   0x0000000a   Code   RO         1470    .text.gpio_init_out  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
-    0x080042f2   0x00000002   PAD
-    0x080042f4   0x0000000c   Code   RO         1472    .text.gpio_init_out_ex  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
-    0x08004300   0x0000000c   Code   RO         8290    .text.gpio_mode     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
-    0x0800430c   0x00000068   Code   RO         8286    .text.gpio_set      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
-    0x08004374   0x00000014   Code   RO         1462    .text.gpio_write    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
-    0x08004388   0x00000014   Code   RO         2389    .text.gpio_write    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
-    0x0800439c   0x00000028   Code   RO         1435    .text.hal_critical_section_enter  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
-    0x080043c4   0x00000088   Code   RO         1439    .text.hal_critical_section_exit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
-    0x0800444c   0x000000f0   Code   RO         2429    .text.handle_error  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x0800453c   0x000000a0   Code   RO         8895    .text.init_32bit_timer  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x080045dc   0x00000066   Code   RO         8679    .text.init_uart     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x08004642   0x00000002   PAD
-    0x08004644   0x00000028   Code   RO         2680    .text.isatty        BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x0800466c   0x00000032   Code   RO         2718    .text.lseek         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x0800469e   0x00000002   PAD
-    0x080046a0   0x0000007c   Code   RO           11    .text.main          BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x0800471c   0x0000001a   Code   RO         2278    .text.mbed_assert_internal  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_assert.o
-    0x08004736   0x00000002   PAD
-    0x08004738   0x0000002c   Code   RO         2900    .text.mbed_copy_nvic  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x08004764   0x0000006c   Code   RO         2391    .text.mbed_die      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
-    0x080047d0   0x00000120   Code   RO         2451    .text.mbed_error    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x080048f0   0x00000002   Code   RO         2435    .text.mbed_error_hook  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x080048f2   0x00000002   PAD
-    0x080048f4   0x0000006a   Code   RO         2439    .text.mbed_error_initialize  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x0800495e   0x00000002   PAD
-    0x08004960   0x00000014   Code   RO         2471    .text.mbed_error_is_hw_fault  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x08004974   0x00000020   Code   RO         2393    .text.mbed_error_printf  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
-    0x08004994   0x00000052   Code   RO         2397    .text.mbed_error_puts  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
-    0x080049e6   0x00000002   PAD
-    0x080049e8   0x00000002   Code   RO         2437    .text.mbed_error_reboot_callback  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x080049ea   0x00000002   PAD
-    0x080049ec   0x00000034   Code   RO         2395    .text.mbed_error_vprintf  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
-    0x08004a20   0x000000f8   Code   RO         2239    .text.mbed_fault_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/mbed_fault_handler.o
-    0x08004b18   0x00000038   Code   RO         2433    .text.mbed_halt_system  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x08004b50   0x00000020   Code   RO         2902    .text.mbed_init     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x08004b70   0x00000002   Code   RO         2894    .text.mbed_main     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x08004b72   0x00000002   PAD
-    0x08004b74   0x00000024   Code   RO         8513    .text.mbed_sdk_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/mbed_overrides.o
-    0x08004b98   0x0000002c   Code   RO          677    .text.mbed_tiny_compute_crc32  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
-    0x08004bc4   0x00000008   Code   RO         2906    .text.mbed_toolchain_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x08004bcc   0x00000096   Code   RO         2690    .text.open          BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08004c62   0x00000002   PAD
-    0x08004c64   0x000000c8   Code   RO         8524    .text.pin_function  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08004d2c   0x0000007c   Code   RO         8536    .text.pin_mode      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08004da8   0x00000164   Code   RO         2241    .text.print_context_info  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/mbed_fault_handler.o
-    0x08004f0c   0x000001ac   Code   RO         2431    .text.print_error_report  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x080050b8   0x000000d4   Code   RO         1622    .text.schedule_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
-    0x0800518c   0x00000018   Code   RO         8685    .text.serial_baud   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x080051a4   0x00000042   Code   RO         8003    .text.serial_getc   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/serial_device.o
-    0x080051e6   0x00000002   PAD
-    0x080051e8   0x00000248   Code   RO         8675    .text.serial_init_direct  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x08005430   0x0000002a   Code   RO         8005    .text.serial_putc   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/serial_device.o
-    0x0800545a   0x00000002   PAD
-    0x0800545c   0x00000032   Code   RO         8699    .text.serial_readable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x0800548e   0x00000002   PAD
-    0x08005490   0x0000001a   Code   RO         8701    .text.serial_writable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x080054aa   0x00000002   PAD
-    0x080054ac   0x00000016   Code   RO         8534    .text.stm_pin_PullConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x080054c2   0x00000002   PAD
-    0x080054c4   0x00000022   Code   RO         8528    .text.stm_pin_SetAFPin  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x080054e6   0x00000002   PAD
-    0x080054e8   0x00000004   Code   RO         2453    .text.system_reset  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x080054ec   0x0000006a   Code   RO         1618    .text.ticker_irq_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
-    0x08005556   0x00000002   PAD
-    0x08005558   0x00000036   Code   RO         8893    .text.timer_irq_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x0800558e   0x00000002   PAD
-    0x08005590   0x00000088   Code   RO         1620    .text.update_present_time  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
-    0x08005618   0x00000012   Code   RO         8913    .text.us_ticker_clear_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x0800562a   0x00000002   PAD
-    0x0800562c   0x00000014   Code   RO         8911    .text.us_ticker_disable_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x08005640   0x00000022   Code   RO         8907    .text.us_ticker_fire_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x08005662   0x00000002   PAD
-    0x08005664   0x0000000a   Code   RO         8891    .text.us_ticker_get_info  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x0800566e   0x00000002   PAD
-    0x08005670   0x0000001c   Code   RO         8901    .text.us_ticker_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x0800568c   0x0000001e   Code   RO         1664    .text.us_ticker_irq_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
-    0x080056aa   0x00000002   PAD
-    0x080056ac   0x0000000c   Code   RO         8903    .text.us_ticker_read  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x080056b8   0x0000001c   Code   RO         8905    .text.us_ticker_set_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x080056d4   0x00000032   Code   RO         2704    .text.write         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08005706   0x0000003e   Code   RO         9620    CL$$btod_d2e        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x08005744   0x00000046   Code   RO         9622    CL$$btod_d2e_denorm_low  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x0800578a   0x00000060   Code   RO         9621    CL$$btod_d2e_norm_op1  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x080057ea   0x00000002   PAD
-    0x080057ec   0x00000338   Code   RO         9630    CL$$btod_div_common  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x08005b24   0x000000dc   Code   RO         9627    CL$$btod_e2e        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x08005c00   0x0000002a   Code   RO         9624    CL$$btod_ediv       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x08005c2a   0x0000002a   Code   RO         9623    CL$$btod_emul       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x08005c54   0x00000244   Code   RO         9629    CL$$btod_mult_common  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
-    0x08005e98   0x00000030   Code   RO         9683    i.__ARM_fpclassify  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\m_wm.l(fpclassify.o)
-    0x08005ec8   0x0000000e   Code   RO         9086    i._is_digit         c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__printf_wp.o)
-    0x08005ed6   0x0000001a   Code   RO         9118    i.fputc             c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fputc.o)
-    0x08005ef0   0x0000002c   Code   RO         9650    locale$$code        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_numeric_c.o)
-    0x08005f1c   0x0000002c   Code   RO         9706    locale$$code        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_ctype_c.o)
-    0x08005f48   0x0000001a   Code   RO         9592    x$fpl$fpinit        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(fpinit.o)
-    0x08005f62   0x00000004   Code   RO         9438    x$fpl$printf1       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(printf1.o)
-    0x08005f66   0x00000004   Code   RO         9440    x$fpl$printf2       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(printf2.o)
-    0x08005f6a   0x00000000   Code   RO         9448    x$fpl$usenofp       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(usenofp.o)
-    0x08005f6a   0x00000028   Data   RO         9074    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_hex_int_ll_ptr.o)
-    0x08005f92   0x00000011   Data   RO         9094    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__printf_flags_ss_wp.o)
-    0x08005fa3   0x00000001   PAD
-    0x08005fa4   0x00000008   Data   RO         9305    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_wctomb.o)
-    0x08005fac   0x00000026   Data   RO         9511    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_hex.o)
-    0x08005fd2   0x00000002   PAD
-    0x08005fd4   0x00000094   Data   RO         9618    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(bigflt0.o)
-    0x08006068   0x00000000   Data   RO         2914    .rodata             BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x08006068   0x00000010   Data   RO         7845    .rodata.AHBPrescTable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
-    0x08006078   0x00000008   Data   RO         7846    .rodata.APBPrescTable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
-    0x08006080   0x00000050   Data   RO         2829    .rodata._ZTV12DirectSerial  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x080060d0   0x00000050   Data   RO         1945    .rodata._ZTVN4mbed10FileHandleE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
-    0x08006120   0x00000018   Data   RO         2839    .rodata._ZZL15default_consolevE14console_pinmap  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08006138   0x00000008   Data   RO         2826    .rodata.__stderr_name  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08006140   0x00000007   Data   RO         2824    .rodata.__stdin_name  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08006147   0x00000008   Data   RO         2825    .rodata.__stdout_name  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x0800614f   0x00000001   PAD
-    0x08006150   0x00000040   Data   RO         8546    .rodata.ll_pin_defines  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
-    0x08006190   0x00000056   Data   RO          914    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/SPI.o
-    0x080061e6   0x000000e0   Data   RO         2245    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/mbed_fault_handler.o
-    0x080062c6   0x0000013b   Data   RO         2480    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x08006401   0x00000063   Data   RO         2833    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x08006464   0x0000002a   Data   RO         8714    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x0800648e   0x00000002   PAD
-    0x08006490   0x00000008   Data   RO         1668    .rodata.us_data     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
-    0x08006498   0x00000024   Data   RO         1670    .rodata.us_interface  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
-    0x080064bc   0x00000008   Data   RO         8921    .rodata.us_ticker_get_info.info  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x080064c4   0x00000020   Data   RO         9782    Region$$Table       anon$$obj.o
-    0x080064e4   0x0000001c   Data   RO         9649    locale$$data        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_numeric_c.o)
-    0x08006500   0x00000110   Data   RO         9705    locale$$data        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_ctype_c.o)
-    0x08006610   0x00000004   Data   RO           20    .init_array         BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x08006614   0x00000000   Data   RO         9179    .init_array         c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(init_aeabi.o)
+    0x08003dd8   0x0000013c   Code   RO         8244    .text.can_irq       BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x08003f14   0x0000003c   Code   RO         2700    .text.close         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08003f50   0x0000006c   Code   RO         1652    .text.compute_tick_round_up  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
+    0x08003fbc   0x0000000c   Code   RO         2410    .text.core_util_are_interrupts_enabled  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
+    0x08003fc8   0x00000010   Code   RO         2291    .text.core_util_atomic_exchange_u8  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_atomic_impl.o
+    0x08003fd8   0x00000016   Code   RO         2289    .text.core_util_atomic_flag_test_and_set  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_atomic_impl.o
+    0x08003fee   0x00000002   PAD
+    0x08003ff0   0x00000084   Code   RO         2416    .text.core_util_critical_section_enter  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
+    0x08004074   0x0000001e   Code   RO         2418    .text.core_util_critical_section_exit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
+    0x08004092   0x00000002   PAD
+    0x08004094   0x0000000c   Code   RO         2412    .text.core_util_is_isr_active  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
+    0x080040a0   0x00000054   Code   RO         8680    .text.debug         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x080040f4   0x00000064   Code   RO         2429    .text.error         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x08004158   0x0000002e   Code   RO         2774    .text.exit          BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08004186   0x00000002   PAD
+    0x08004188   0x0000002c   Code   RO         2726    .text.fsync         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080041b4   0x000000c0   Code   RO         8670    .text.get_uart_index  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x08004274   0x00000016   Code   RO         8285    .text.gpio_dir      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
+    0x0800428a   0x00000002   PAD
+    0x0800428c   0x00000046   Code   RO         8281    .text.gpio_init     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
+    0x080042d2   0x00000002   PAD
+    0x080042d4   0x0000000a   Code   RO         1472    .text.gpio_init_out  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
+    0x080042de   0x00000002   PAD
+    0x080042e0   0x0000000c   Code   RO         1474    .text.gpio_init_out_ex  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
+    0x080042ec   0x0000000c   Code   RO         8283    .text.gpio_mode     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
+    0x080042f8   0x00000064   Code   RO         8279    .text.gpio_set      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/gpio_api.o
+    0x0800435c   0x00000014   Code   RO         1464    .text.gpio_write    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_gpio.o
+    0x08004370   0x00000014   Code   RO         2391    .text.gpio_write    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
+    0x08004384   0x0000002c   Code   RO         1437    .text.hal_critical_section_enter  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
+    0x080043b0   0x00000084   Code   RO         1441    .text.hal_critical_section_exit  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
+    0x08004434   0x000000f0   Code   RO         2431    .text.handle_error  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x08004524   0x000000a0   Code   RO         8850    .text.init_32bit_timer  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x080045c4   0x00000066   Code   RO         8672    .text.init_uart     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x0800462a   0x00000002   PAD
+    0x0800462c   0x00000028   Code   RO         2682    .text.isatty        BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08004654   0x00000032   Code   RO         2720    .text.lseek         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08004686   0x00000002   PAD
+    0x08004688   0x0000007c   Code   RO           11    .text.main          BUILD/NUCLEO_F429ZI/ARMC6/main.o
+    0x08004704   0x0000001a   Code   RO         2280    .text.mbed_assert_internal  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_assert.o
+    0x0800471e   0x00000002   PAD
+    0x08004720   0x0000002c   Code   RO         2902    .text.mbed_copy_nvic  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x0800474c   0x0000006c   Code   RO         2393    .text.mbed_die      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
+    0x080047b8   0x00000120   Code   RO         2453    .text.mbed_error    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x080048d8   0x00000002   Code   RO         2437    .text.mbed_error_hook  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x080048da   0x00000002   PAD
+    0x080048dc   0x0000006a   Code   RO         2441    .text.mbed_error_initialize  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x08004946   0x00000002   PAD
+    0x08004948   0x00000014   Code   RO         2473    .text.mbed_error_is_hw_fault  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x0800495c   0x00000020   Code   RO         2395    .text.mbed_error_printf  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
+    0x0800497c   0x00000052   Code   RO         2399    .text.mbed_error_puts  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
+    0x080049ce   0x00000002   PAD
+    0x080049d0   0x00000002   Code   RO         2439    .text.mbed_error_reboot_callback  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x080049d2   0x00000002   PAD
+    0x080049d4   0x00000034   Code   RO         2397    .text.mbed_error_vprintf  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_board.o
+    0x08004a08   0x000000f8   Code   RO         2241    .text.mbed_fault_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/mbed_fault_handler.o
+    0x08004b00   0x00000038   Code   RO         2435    .text.mbed_halt_system  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x08004b38   0x00000020   Code   RO         2904    .text.mbed_init     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x08004b58   0x00000002   Code   RO         2896    .text.mbed_main     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x08004b5a   0x00000002   PAD
+    0x08004b5c   0x00000024   Code   RO         8506    .text.mbed_sdk_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/mbed_overrides.o
+    0x08004b80   0x0000002c   Code   RO          679    .text.mbed_tiny_compute_crc32  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/MbedCRC.o
+    0x08004bac   0x00000008   Code   RO         2908    .text.mbed_toolchain_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x08004bb4   0x00000096   Code   RO         2692    .text.open          BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08004c4a   0x00000002   PAD
+    0x08004c4c   0x000000c4   Code   RO         8517    .text.pin_function  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08004d10   0x0000007c   Code   RO         8529    .text.pin_mode      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08004d8c   0x00000164   Code   RO         2243    .text.print_context_info  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/mbed_fault_handler.o
+    0x08004ef0   0x000001ac   Code   RO         2433    .text.print_error_report  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x0800509c   0x000000d0   Code   RO         1624    .text.schedule_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
+    0x0800516c   0x00000018   Code   RO         8678    .text.serial_baud   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x08005184   0x00000042   Code   RO         7996    .text.serial_getc   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/serial_device.o
+    0x080051c6   0x00000002   PAD
+    0x080051c8   0x00000240   Code   RO         8668    .text.serial_init_direct  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x08005408   0x0000002a   Code   RO         7998    .text.serial_putc   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/serial_device.o
+    0x08005432   0x00000002   PAD
+    0x08005434   0x00000032   Code   RO         8692    .text.serial_readable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x08005466   0x00000002   PAD
+    0x08005468   0x0000001a   Code   RO         8694    .text.serial_writable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x08005482   0x00000002   PAD
+    0x08005484   0x00000016   Code   RO         8527    .text.stm_pin_PullConfig  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x0800549a   0x00000002   PAD
+    0x0800549c   0x00000022   Code   RO         8521    .text.stm_pin_SetAFPin  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x080054be   0x00000002   PAD
+    0x080054c0   0x00000004   Code   RO         2455    .text.system_reset  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x080054c4   0x0000006a   Code   RO         1620    .text.ticker_irq_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
+    0x0800552e   0x00000002   PAD
+    0x08005530   0x00000036   Code   RO         8848    .text.timer_irq_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08005566   0x00000002   PAD
+    0x08005568   0x00000088   Code   RO         1622    .text.update_present_time  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_ticker_api.o
+    0x080055f0   0x00000012   Code   RO         8868    .text.us_ticker_clear_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08005602   0x00000002   PAD
+    0x08005604   0x00000014   Code   RO         8866    .text.us_ticker_disable_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08005618   0x00000022   Code   RO         8862    .text.us_ticker_fire_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x0800563a   0x00000002   PAD
+    0x0800563c   0x0000000a   Code   RO         8846    .text.us_ticker_get_info  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08005646   0x00000002   PAD
+    0x08005648   0x0000001c   Code   RO         8856    .text.us_ticker_init  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08005664   0x0000001e   Code   RO         1666    .text.us_ticker_irq_handler  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
+    0x08005682   0x00000002   PAD
+    0x08005684   0x0000000c   Code   RO         8858    .text.us_ticker_read  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x08005690   0x0000001c   Code   RO         8860    .text.us_ticker_set_interrupt  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x080056ac   0x00000032   Code   RO         2706    .text.write         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080056de   0x0000003e   Code   RO         9575    CL$$btod_d2e        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x0800571c   0x00000046   Code   RO         9577    CL$$btod_d2e_denorm_low  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x08005762   0x00000060   Code   RO         9576    CL$$btod_d2e_norm_op1  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x080057c2   0x00000002   PAD
+    0x080057c4   0x00000338   Code   RO         9585    CL$$btod_div_common  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x08005afc   0x000000dc   Code   RO         9582    CL$$btod_e2e        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x08005bd8   0x0000002a   Code   RO         9579    CL$$btod_ediv       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x08005c02   0x0000002a   Code   RO         9578    CL$$btod_emul       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x08005c2c   0x00000244   Code   RO         9584    CL$$btod_mult_common  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(btod.o)
+    0x08005e70   0x00000030   Code   RO         9638    i.__ARM_fpclassify  c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\m_wm.l(fpclassify.o)
+    0x08005ea0   0x0000000e   Code   RO         9041    i._is_digit         c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__printf_wp.o)
+    0x08005eae   0x0000001a   Code   RO         9073    i.fputc             c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(fputc.o)
+    0x08005ec8   0x0000002c   Code   RO         9605    locale$$code        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_numeric_c.o)
+    0x08005ef4   0x0000002c   Code   RO         9661    locale$$code        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_ctype_c.o)
+    0x08005f20   0x0000001a   Code   RO         9547    x$fpl$fpinit        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(fpinit.o)
+    0x08005f3a   0x00000004   Code   RO         9393    x$fpl$printf1       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(printf1.o)
+    0x08005f3e   0x00000004   Code   RO         9395    x$fpl$printf2       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(printf2.o)
+    0x08005f42   0x00000000   Code   RO         9403    x$fpl$usenofp       c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\fz_wm.l(usenofp.o)
+    0x08005f42   0x00000028   Data   RO         9029    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_hex_int_ll_ptr.o)
+    0x08005f6a   0x00000011   Data   RO         9049    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(__printf_flags_ss_wp.o)
+    0x08005f7b   0x00000001   PAD
+    0x08005f7c   0x00000008   Data   RO         9260    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_wctomb.o)
+    0x08005f84   0x00000026   Data   RO         9466    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(_printf_fp_hex.o)
+    0x08005faa   0x00000002   PAD
+    0x08005fac   0x00000094   Data   RO         9573    .constdata          c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(bigflt0.o)
+    0x08006040   0x00000000   Data   RO         2916    .rodata             BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x08006040   0x00000010   Data   RO         7838    .rodata.AHBPrescTable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
+    0x08006050   0x00000008   Data   RO         7839    .rodata.APBPrescTable  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
+    0x08006058   0x00000050   Data   RO         2831    .rodata._ZTV12DirectSerial  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x080060a8   0x00000050   Data   RO         1947    .rodata._ZTVN4mbed10FileHandleE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileHandle.o
+    0x080060f8   0x00000018   Data   RO         2841    .rodata._ZZL15default_consolevE14console_pinmap  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08006110   0x00000008   Data   RO         2828    .rodata.__stderr_name  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08006118   0x00000007   Data   RO         2826    .rodata.__stdin_name  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x0800611f   0x00000008   Data   RO         2827    .rodata.__stdout_name  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x08006127   0x00000001   PAD
+    0x08006128   0x00000040   Data   RO         8539    .rodata.ll_pin_defines  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/pinmap.o
+    0x08006168   0x00000056   Data   RO          916    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/drivers/source/SPI.o
+    0x080061be   0x000000e0   Data   RO         2247    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/TARGET_CORTEX_M/mbed_fault_handler.o
+    0x0800629e   0x0000013b   Data   RO         2482    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x080063d9   0x00000063   Data   RO         2835    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x0800643c   0x0000002a   Data   RO         8707    .rodata.str1.1      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x08006466   0x00000002   PAD
+    0x08006468   0x00000008   Data   RO         1670    .rodata.us_data     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
+    0x08006470   0x00000024   Data   RO         1672    .rodata.us_interface  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
+    0x08006494   0x00000008   Data   RO         8876    .rodata.us_ticker_get_info.info  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x0800649c   0x00000020   Data   RO         9737    Region$$Table       anon$$obj.o
+    0x080064bc   0x0000001c   Data   RO         9604    locale$$data        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_numeric_c.o)
+    0x080064d8   0x00000110   Data   RO         9660    locale$$data        c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(lc_ctype_c.o)
+    0x080065e8   0x00000004   Data   RO           20    .init_array         BUILD/NUCLEO_F429ZI/ARMC6/main.o
+    0x080065ec   0x00000000   Data   RO         9134    .init_array         c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(init_aeabi.o)
 
 
     Execution Region RW_IRAM2 (Base: 0x10000000, Size: 0x00000000, Max: 0x00010000, ABSOLUTE)
@@ -7779,62 +7778,62 @@ Memory Map of the image
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x200002b0   0x00000004   Data   RW         9134    .data               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
-    0x200002b4   0x00000004   Data   RW         9135    .data               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
-    0x200002b8   0x00000004   Data   RW         9136    .data               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
-    0x200002bc   0x00000004   Data   RW         7844    .data.SystemCoreClock  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
-    0x200002c0   0x00000040   Data   RW         2838    .data._ZL11filehandles  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x20000300   0x00000004   Data   RW         1669    .data.irq_handler   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
-    0x20000304   0x00000004   Data   RW         3798    .data.uwTickPrio    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal.o
-    0x20000308   0x00000004   Zero   RW         8959    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_errno_addr.o)
-    0x2000030c   0x00000054   Zero   RW         9131    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
-    0x20000360   0x00000054   Zero   RW         9132    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
-    0x200003b4   0x00000054   Zero   RW         9133    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
-    0x20000408   0x00000004   Zero   RW         9262    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_heap_descriptor.o)
-    0x2000040c   0x00000014   Zero   RW         9607    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_locale.o)
-    0x20000420   0x00000048   Zero   RW         8922    .bss.TimMasterHandle  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
-    0x20000468   0x00000004   Zero   RW         2841    .bss._ZGVZL15default_consolevE7console  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x2000046c   0x00000010   Zero   RW         2831    .bss._ZL13stdio_in_prev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x2000047c   0x00000010   Zero   RW         2832    .bss._ZL14stdio_out_prev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x2000048c   0x00000008   Zero   RW         2837    .bss._ZL16filehandle_mutex  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x20000494   0x00000004   Zero   RW         1931    .bss._ZN4mbed8FileBase5_headE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
-    0x20000498   0x00000008   Zero   RW         1932    .bss._ZN4mbed8FileBase6_mutexE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
-    0x200004a0   0x00000004   Zero   RW         1933    .bss._ZN4mbed8FileBase8_defaultE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
-    0x200004a4   0x00000004   Zero   RW         2840    .bss._ZZL15default_consolevE7console  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x200002b0   0x00000004   Data   RW         9089    .data               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
+    0x200002b4   0x00000004   Data   RW         9090    .data               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
+    0x200002b8   0x00000004   Data   RW         9091    .data               c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
+    0x200002bc   0x00000004   Data   RW         7837    .data.SystemCoreClock  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/system_stm32f4xx.o
+    0x200002c0   0x00000040   Data   RW         2840    .data._ZL11filehandles  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x20000300   0x00000004   Data   RW         1671    .data.irq_handler   BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
+    0x20000304   0x00000004   Data   RW         3791    .data.uwTickPrio    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/STM32Cube_FW/STM32F4xx_HAL_Driver/stm32f4xx_hal.o
+    0x20000308   0x00000004   Zero   RW         8914    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_errno_addr.o)
+    0x2000030c   0x00000054   Zero   RW         9086    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
+    0x20000360   0x00000054   Zero   RW         9087    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
+    0x200003b4   0x00000054   Zero   RW         9088    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(stdio_streams.o)
+    0x20000408   0x00000004   Zero   RW         9217    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_heap_descriptor.o)
+    0x2000040c   0x00000014   Zero   RW         9562    .bss                c:\Users\Ziya\AppData\Local\Mbed Studio\mbed-studio-tools\ac6\bin\..\lib\armlib\c_w.l(rt_locale.o)
+    0x20000420   0x00000048   Zero   RW         8877    .bss.TimMasterHandle  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/us_ticker.o
+    0x20000468   0x00000004   Zero   RW         2843    .bss._ZGVZL15default_consolevE7console  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x2000046c   0x00000010   Zero   RW         2833    .bss._ZL13stdio_in_prev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x2000047c   0x00000010   Zero   RW         2834    .bss._ZL14stdio_out_prev  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x2000048c   0x00000008   Zero   RW         2839    .bss._ZL16filehandle_mutex  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x20000494   0x00000004   Zero   RW         1933    .bss._ZN4mbed8FileBase5_headE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
+    0x20000498   0x00000008   Zero   RW         1934    .bss._ZN4mbed8FileBase6_mutexE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
+    0x200004a0   0x00000004   Zero   RW         1935    .bss._ZN4mbed8FileBase8_defaultE  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/FileBase.o
+    0x200004a4   0x00000004   Zero   RW         2842    .bss._ZZL15default_consolevE7console  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
     0x200004a8   0x0000001c   Zero   RW           19    .bss.blueLED        BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x200004c4   0x00000008   Zero   RW         8274    .bss.can_irq_contexts  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
-    0x200004cc   0x00000001   Zero   RW         1444    .bss.critical_interrupts_enabled  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
+    0x200004c4   0x00000008   Zero   RW         8267    .bss.can_irq_ids    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x200004cc   0x00000001   Zero   RW         1446    .bss.critical_interrupts_enabled  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
     0x200004cd   0x00000003   PAD
-    0x200004d0   0x00000004   Zero   RW         2418    .bss.critical_section_reentrancy_counter  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
-    0x200004d4   0x00000004   Zero   RW         2479    .bss.error_count    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x200004d8   0x00000004   Zero   RW         2481    .bss.error_hook     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x200004d0   0x00000004   Zero   RW         2420    .bss.critical_section_reentrancy_counter  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_critical.o
+    0x200004d4   0x00000004   Zero   RW         2481    .bss.error_count    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x200004d8   0x00000004   Zero   RW         2483    .bss.error_hook     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
     0x200004dc   0x00000004   PAD
-    0x200004e0   0x00000038   Zero   RW         1671    .bss.events         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
-    0x20000518   0x00000040   Zero   RW         2478    .bss.first_error_ctx  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x200004e0   0x00000038   Zero   RW         1673    .bss.events         BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_us_ticker_api.o
+    0x20000518   0x00000040   Zero   RW         2480    .bss.first_error_ctx  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
     0x20000558   0x0000001c   Zero   RW           17    .bss.greenLED       BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x20000574   0x00000001   Zero   RW         2482    .bss.halt_in_progress  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x20000574   0x00000001   Zero   RW         2484    .bss.halt_in_progress  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
     0x20000575   0x00000003   PAD
-    0x20000578   0x00000004   Zero   RW         8273    .bss.irq_handler    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
-    0x2000057c   0x00000001   Zero   RW         2477    .bss.is_reboot_error_valid  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x20000578   0x00000004   Zero   RW         8266    .bss.irq_handler    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/can_api.o
+    0x2000057c   0x00000001   Zero   RW         2479    .bss.is_reboot_error_valid  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
     0x2000057d   0x00000003   PAD
-    0x20000580   0x00000040   Zero   RW         2476    .bss.last_error_ctx  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
-    0x200005c0   0x00000001   Zero   RW         2475    .bss.mbed_error_in_progress  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x20000580   0x00000040   Zero   RW         2478    .bss.last_error_ctx  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
+    0x200005c0   0x00000001   Zero   RW         2477    .bss.mbed_error_in_progress  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_error.o
     0x200005c1   0x00000003   PAD
-    0x200005c4   0x00000004   Zero   RW         2828    .bss.mbed_heap_size  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x200005c8   0x00000004   Zero   RW         2827    .bss.mbed_heap_start  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
-    0x200005cc   0x00000004   Zero   RW         8515    .bss.mbed_sdk_inited  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/mbed_overrides.o
-    0x200005d0   0x00000004   Zero   RW         2913    .bss.mbed_stack_isr_size  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x200005d4   0x00000004   Zero   RW         2912    .bss.mbed_stack_isr_start  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
-    0x200005d8   0x00000002   Zero   RW         8374    .bss.prev_tick_remainder  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
+    0x200005c4   0x00000004   Zero   RW         2830    .bss.mbed_heap_size  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x200005c8   0x00000004   Zero   RW         2829    .bss.mbed_heap_start  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_retarget.o
+    0x200005cc   0x00000004   Zero   RW         8508    .bss.mbed_sdk_inited  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/mbed_overrides.o
+    0x200005d0   0x00000004   Zero   RW         2915    .bss.mbed_stack_isr_size  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x200005d4   0x00000004   Zero   RW         2914    .bss.mbed_stack_isr_start  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/platform/source/mbed_sdk_boot.o
+    0x200005d8   0x00000002   Zero   RW         8367    .bss.prev_tick_remainder  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
     0x200005da   0x00000002   PAD
-    0x200005dc   0x00000004   Zero   RW         8373    .bss.prev_time      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
+    0x200005dc   0x00000004   Zero   RW         8366    .bss.prev_time      BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
     0x200005e0   0x0000001c   Zero   RW           18    .bss.redLED         BUILD/NUCLEO_F429ZI/ARMC6/main.o
-    0x200005fc   0x00000001   Zero   RW         1443    .bss.state_saved    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
+    0x200005fc   0x00000001   Zero   RW         1445    .bss.state_saved    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/hal/source/mbed_critical_section_api.o
     0x200005fd   0x00000003   PAD
-    0x20000600   0x0000004c   Zero   RW         8715    .bss.stdio_uart     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x2000064c   0x00000004   Zero   RW         8713    .bss.stdio_uart_inited  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
-    0x20000650   0x00000004   Zero   RW         8375    .bss.total_ticks    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
-    0x20000654   0x00000220   Zero   RW         8047    .bss.uart_handlers  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/serial_device.o
+    0x20000600   0x0000004c   Zero   RW         8708    .bss.stdio_uart     BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x2000064c   0x00000004   Zero   RW         8706    .bss.stdio_uart_inited  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/serial_api.o
+    0x20000650   0x00000004   Zero   RW         8368    .bss.total_ticks    BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/hal_tick_overrides.o
+    0x20000654   0x00000220   Zero   RW         8040    .bss.uart_handlers  BUILD/NUCLEO_F429ZI/ARMC6/mbed-os/targets/TARGET_STM/TARGET_STM32F4/serial_device.o
 
 
     Execution Region ARM_LIB_HEAP (Base: 0x20000880, Size: 0x0002e780, Max: 0x0002e780, ABSOLUTE)
@@ -7858,7 +7857,7 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     13984       1152       1580         76     195796     736206   Object Totals
+     13944       1152       1580         76     195796     736103   Object Totals
          0          0         32          0     194688          0   (incl. Generated)
        204          0          3          0         21          0   (incl. Padding)
      10014        510        554         12        280       7492   Library Totals
@@ -7869,15 +7868,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     23998       1662       2134         88     196076     738718   Grand Totals
-     23998       1662       2134         88     196076     738718   ELF Image Totals
-     23998       1662       2134         88          0          0   ROM Totals
+     23958       1662       2134         88     196076     738615   Grand Totals
+     23958       1662       2134         88     196076     738615   ELF Image Totals
+     23958       1662       2134         88          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                26132 (  25.52kB)
+    Total RO  Size (Code + RO Data)                26092 (  25.48kB)
     Total RW  Size (RW Data + ZI Data)            196164 ( 191.57kB)
-    Total ROM Size (Code + RO Data + RW Data)      26220 (  25.61kB)
+    Total ROM Size (Code + RO Data + RW Data)      26180 (  25.57kB)
 
 ==============================================================================
 

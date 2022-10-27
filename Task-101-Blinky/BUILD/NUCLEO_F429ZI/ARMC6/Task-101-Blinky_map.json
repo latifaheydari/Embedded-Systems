@@ -68,7 +68,7 @@
     {
         "module": "mbed-os\\drivers",
         "size": {
-            ".text": 690,
+            ".text": 686,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -79,7 +79,7 @@
     {
         "module": "mbed-os\\hal",
         "size": {
-            ".text": 964,
+            ".text": 960,
             ".data": 4,
             ".bss": 58,
             ".text-delta": 0,
@@ -90,7 +90,7 @@
     {
         "module": "mbed-os\\platform",
         "size": {
-            ".text": 5839,
+            ".text": 5823,
             ".data": 64,
             ".bss": 223,
             ".text-delta": 0,
@@ -101,7 +101,7 @@
     {
         "module": "mbed-os\\targets",
         "size": {
-            ".text": 7564,
+            ".text": 7548,
             ".data": 8,
             ".bss": 722,
             ".text-delta": 0,
@@ -113,7 +113,7 @@
         "summary": {
             "static_ram": 5807,
             "static_ram_delta": 0,
-            "total_flash": 25984,
+            "total_flash": 25944,
             "total_flash_delta": 0
         }
     }

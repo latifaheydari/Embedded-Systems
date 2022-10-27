@@ -2,7 +2,7 @@
     {
         "module": "[lib]\\c_w.l",
         "size": {
-            ".text": 10413,
+            ".text": 20459,
             ".data": 12,
             ".bss": 280,
             ".text-delta": 0,
@@ -13,7 +13,7 @@
     {
         "module": "[lib]\\fz_wm.l",
         "size": {
-            ".text": 2456,
+            ".text": 3226,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -22,9 +22,20 @@
         }
     },
     {
+        "module": "[lib]\\libcpp_w.l",
+        "size": {
+            ".text": 66862,
+            ".data": 0,
+            ".bss": 2961,
+            ".text-delta": 0,
+            ".data-delta": 0,
+            ".bss-delta": 0
+        }
+    },
+    {
         "module": "[lib]\\libcppabi_w.l",
         "size": {
-            ".text": 44,
+            ".text": 2615,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -35,7 +46,7 @@
     {
         "module": "[lib]\\m_wm.l",
         "size": {
-            ".text": 48,
+            ".text": 794,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -66,11 +77,11 @@
         }
     },
     {
-        "module": "libuopmsb\\TextLCD",
+        "module": "libuopmsb\\uopmsb",
         "size": {
-            ".text": 44,
+            ".text": 338,
             ".data": 0,
-            ".bss": 0,
+            ".bss": 1,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -79,10 +90,10 @@
     {
         "module": "main.o",
         "size": {
-            ".text": 824,
+            ".text": 746,
             ".data": 0,
             ".bss": 304,
-            ".text-delta": 0,
+            ".text-delta": -54,
             ".data-delta": 0,
             ".bss-delta": 0
         }
@@ -90,7 +101,7 @@
     {
         "module": "mbed-os\\drivers",
         "size": {
-            ".text": 816,
+            ".text": 844,
             ".data": 0,
             ".bss": 0,
             ".text-delta": 0,
@@ -112,7 +123,7 @@
     {
         "module": "mbed-os\\platform",
         "size": {
-            ".text": 5929,
+            ".text": 6309,
             ".data": 64,
             ".bss": 225,
             ".text-delta": 0,
@@ -133,10 +144,10 @@
     },
     {
         "summary": {
-            "static_ram": 6101,
+            "static_ram": 9063,
             "static_ram_delta": 0,
-            "total_flash": 33291,
-            "total_flash_delta": 0
+            "total_flash": 114910,
+            "total_flash_delta": -54
         }
     }
 ]
